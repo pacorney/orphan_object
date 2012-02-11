@@ -4,7 +4,7 @@
 * Implementation of hook_perm()
 */
 
-function hook_perm() {
+function orphan_object_perm() {
   return array('administer Orphan Object Adminstration');
 }
 
