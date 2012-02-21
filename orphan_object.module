@@ -95,12 +95,6 @@ function orphan_object_formpage($form_state) {
       '#value' => $orphan['title'],
     );
   }
-  
-  $form['testri'] = array(
-    '#value' => foreach ($ritestarray as $ritest){
-	  $ritest
-	},
-  );
 
   //Set form submit and theme
   $form['#submit'][] = 'orphan_object_formpage_submit';
