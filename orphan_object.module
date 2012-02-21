@@ -275,6 +275,7 @@ function orphan_object_inactivate_fedora_objects($objects, $uid) {
 function orphan_object_getlist() {
   module_load_include('inc', 'fedora_repository', 'api/fedora_collection');
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
+  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
 
   $query_string = 'select $object $title from <#ri> where ($object <dc:title> $title)';
 
