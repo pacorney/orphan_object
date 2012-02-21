@@ -87,7 +87,7 @@ function orphan_object_formpage($form_state) {
     '#value' => 'Save Configuration',
   );
   
-  $ritestarray = get_related_items_as_array('islandora:bookCollection');
+  $ritestarray = get_related_items_as_array('islandora:bookCollection', 'isMemberOfCollection');
  
   $form['testri'] = array(
     '#value' => $ritestarray,
