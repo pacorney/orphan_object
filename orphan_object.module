@@ -90,7 +90,9 @@ function orphan_object_formpage($form_state) {
   $ritestarray = get_related_items_as_array('islandora:bookCollection', 'isMemberOfCollection');
  
   $form['testri'] = array(
-    '#value' => $ritestarray,
+    '#value' => foreach ($ritestarray as $ritest){
+	  $ritest
+	},
   );
 
   //Set form submit and theme
