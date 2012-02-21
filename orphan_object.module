@@ -88,11 +88,8 @@ function orphan_object_formpage($form_state) {
   
   $ritestarray = orphan_object_getlist();
  
-  }
   $form['testri'] = array(
-    '#value' => foreach ($ritestarray as $rithing) {
-	  <p>$rithing</p>
-	}
+    '#value' => $ritestarray,
   );
 
   //Set form submit and theme
@@ -276,6 +273,8 @@ function orphan_object_inactivate_fedora_objects($objects, $uid) {
 }
 
 function orphan_object_getlist() {
+  module_load_include('inc', 'fedora_repository', 'api/fedora_collection');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
 
   $query_string = 'select $object $title from <#ri> where ($object <dc:title> $title)';
 
