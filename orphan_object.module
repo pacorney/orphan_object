@@ -88,7 +88,14 @@ function orphan_object_formpage($form_state) {
   );
   
   $ritestarray = get_related_items_as_array('islandora:bookCollection', 'isMemberOfCollection');
- 
+  
+  foreach ($ritestarray as $rivalue) {
+    $form['ritest']= array
+    (
+      '#value' => $orphan['title'],
+    );
+  }
+  
   $form['testri'] = array(
     '#value' => foreach ($ritestarray as $ritest){
 	  $ritest
