@@ -338,13 +338,15 @@ function orphan_object_getlist() {
         array_push($cpidarray, $cpidparts[0]);
       }
     }
+  $collectionsarray = array_merge ($collectionsarray, $cpidarray);	
+  
   }
   
-  $collectionsarray = array_merge ($collectionsarray, $cpidarray);
+  
 
   $returnlist = array_diff($everything, $collectionsarray);
 
-  return $collectionsarray;
+  return $returnlist;
 }
 
 /**
