@@ -370,7 +370,7 @@ function orphan_object_getlist() {
   $returnlist = array_diff($everything, $collectionsarray);
   $returnlist = array_diff($returnlist, $cmodels);
   
-  return $cmodels;
+  return $returnlist;
 }
 
 /**
