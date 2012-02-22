@@ -94,7 +94,7 @@ function orphan_object_formpage($form_state) {
   foreach ($ritestarray as $rivalue) {
     $form[$rivalue]= array
     (
-      '#value' => '<p>'$rivalue'</p>',
+      '#value' => '<p>' . $rivalue . '</p>',
     );
   }
 
