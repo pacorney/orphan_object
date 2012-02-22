@@ -54,6 +54,7 @@ function orphan_object_form() {
 function orphan_object_formpage($form_state) {
 
   module_load_include('inc', 'fedora_repository', 'api/fedora_collection');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   // Creates an array to hold the values to be used to create the form elements
   $orphans = array
   (
@@ -87,7 +88,8 @@ function orphan_object_formpage($form_state) {
     '#value' => 'Save Configuration',
   );
   
-  $ritestarray = orphan_object_getlist();
+  //$ritestarray = orphan_object_getlist();
+  $ritestarray =  get_collections_as_option_array()
   
   foreach ($ritestarray as $rivalue) {
     $form['ritest']= array
