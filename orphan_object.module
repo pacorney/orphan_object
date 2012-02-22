@@ -92,7 +92,7 @@ function orphan_object_formpage($form_state) {
   //$ritestarray = get_collections_as_option_array();
   
   foreach ($ritestarray as $rivalue) {
-    $form['ritest']= array
+    $form[$rivalue]= array
     (
       '#value' => $rivalue,
     );
@@ -344,7 +344,7 @@ function orphan_object_getlist() {
 
   $returnlist = array_diff($everything, $collectionsarray);
 
-  return $everything;
+  return $returnlist;
 }
 
 /**
