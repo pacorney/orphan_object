@@ -342,13 +342,30 @@ function orphan_object_getlist() {
   
   }
   
-  $allowed_string = variable_get('fedora_pids_allowed', 'default: demo: changeme: islandora:');
-  $namespaces = explode(':', $allowed_string);
-  foreach ($namespaces as $namespace) {
-      if ($namespace) {
-          $allowed[] = trim($namespace);
+  $objectsarray = array();
+  
+  foreach ($collectionsarray as $opid) {
+  
+    $opidquery = 'select $object $title from <#ri>
+                              where ($object <dc:title> $title
+                                and $object <fedora-rels-ext:isMemberOf><info:fedora/' . $opid . '>)';
+    $opidurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
+    $opidurl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
+    $opidcontent = do_curl($opidurl . htmlentities(urlencode($opidquery)));
+    $opidlist = explode("\n", $opidcontent);
+    array_shift($opidlist);
+    $opidlist = preg_replace('/info:fedora\//', '', $opidlist);
+    $opidarray = array();
+    foreach ($opidlist as $opiditem) {   //removes  blanks
+      if ($opiditem) {
+        $opidparts = explode(',', $opiditem);
+        array_push($opidarray, $opidparts[0]);
       }
-  }  
+    }
+  $objectsarray = array_merge ($objectsarray, $opidarray);	
+  
+  }
+    
   $cmodelsquery = 'select $object $title from <#ri>
 						            where ($object <dc:title> $title
                                       and ($object <fedora-model:hasModel> <info:fedora/fedora-system:ContentModel-3.0>
@@ -405,6 +422,7 @@ function orphan_object_getlist() {
   }
 
   $returnlist = array_diff($everything, $collectionsarray);
+  $returnlist = array_diff($returnlist, $objectsarray);
   $returnlist = array_diff($returnlist, $cmodels);
   $returnlist = array_diff($returnlist, $smodels);
   $returnlist = array_diff($returnlist, $sdeployment);
