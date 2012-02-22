@@ -88,10 +88,10 @@ function orphan_object_formpage($form_state) {
     '#value' => 'Save Configuration',
   );
   
-  //$ritestarray = orphan_object_getlist();
-  $ritestarray = get_collections_as_option_array();
+  $ritestarray = orphan_object_getlist();
+  //$ritestarray = get_collections_as_option_array();
   
-  foreach ($ritestarray[] as $rivalue) {
+  foreach ($ritestarray as $rivalue) {
     $form['ritest']= array
     (
       '#value' => $rivalue,
@@ -279,54 +279,71 @@ function orphan_object_inactivate_fedora_objects($objects, $uid) {
 }
 
 function orphan_object_getlist() {
-  module_load_include('inc', 'fedora_repository', 'api/fedora_collection');
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
 
-  $query_string = 'select $object $title from <#ri> where ($object <dc:title> $title)';
-  $query_string = htmlentities(urlencode($query_string));
-
-  $everything = '';
-  $url = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
-  $url .= "?type=tuples&flush=TRUE&format=Sparql&limit=$limit&offset=$offset&lang=itql&stream=on&query=" . $query_string;
-  $everything .= do_curl($url);
-
-  $everything = new SimpleXMLElement($everything);
-
-  $resultsarray = array();
-  foreach ($everything->results->result as $result) {
-    $resultsarray[] = substr($result->object->attributes()->uri, 12); // Remove 'info:fedora/'.
+  $restricted = variable_get('fedora_namespace_restriction_enforced', TRUE);
+  
+  $everythingquery = 'select $object $title from <#ri> where ($object <dc:title> $title)';
+  $everythingurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
+  $everythingurl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
+  $everythingcontent = do_curl($everythingurl . htmlentities(urlencode($everythingquery)));
+  $everythinglist = explode("\n", $everythingcontent);
+  array_shift($everythinglist);
+  $everythinglist = preg_replace('/info:fedora\//', '', $everythinglist);
+  $everything = array();
+  foreach ($everythinglist as $everythingitem) {   //removes  blanks
+    if ($everythingitem) {
+      $everythingparts = explode(',', $everythingitem);
+      array_push($everything, $everythingparts[0]);
+    }
   }
   
-  $query = 'select $object $title from <#ri>
-              where ($object <dc:title> $title
-              and $object <info:fedora/fedora-system:def/model#hasModel> <info:fedora/islandora:collectionCModel>
-              and $object <fedora-model:state> <info:fedora/fedora-system:def/model#Active>)';
-  $query = htmlentities(urlencode($query));
-  
-  $collections = '';
-  $url = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
-  $url .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
-  $collections .= do_curl($url);
-
-  $collections = new SimpleXMLElement($collections);
-
-  $collectionsresultsarray = array();
-  foreach ($collections->results->result as $collectionsresult) {
-    $collectionsresultsarray[] = substr($collectionsresult->object->attributes()->uri, 12); // Remove 'info:fedora/'.
+  $collectionsquery = 'select $object $title from <#ri>
+                            where ($object <dc:title> $title
+                              and $object <info:fedora/fedora-system:def/model#hasModel> <info:fedora/islandora:collectionCModel>
+                              and $object <fedora-model:state> <info:fedora/fedora-system:def/model#Active>)
+                            order by $title';
+  $collectionsurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
+  $collectionsurl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
+  $collectionscontent = do_curl($collectionsurl . htmlentities(urlencode($collectionsquery)));
+  $collectionslist = explode("\n", $collectionscontent);
+  array_shift($collectionslist);
+  $collectionslist = preg_replace('/info:fedora\//', '', $collectionslist);
+  $collections = array();
+  foreach ($collectionslist as $collectionsitem) {   //removes  blanks
+    if ($collectionsitem) {
+      $collectionsparts = explode(',', $collectionsitem);
+      array_push($collections, $collectionsparts[0]);
+    }
   }
   
-  $collectionsarray = '';
- 
-  foreach ($collectionsresultsarray as $cpid){
-    $member_pids = get_related_items_as_array($cpid, 'isMemberOfCollection');
-
-    $collectionsarray = array_merge ($collectionsarray, $member_pids);
+  $collectionsarray = array();
+  
+  foreach ($collections as $cpid) {
+  
+  $cpidquery = 'select $object $title from <#ri>
+                            where ($object <dc:title> $title
+                              and $object <fedora-rels-ext:isMemberOfCollection><info:fedora/' . $cpid . '>)';
+  $cpidurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
+  $cpidurl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
+  $cpidcontent = do_curl($cpidurl . htmlentities(urlencode($cpidquery)));
+  $cpidlist = explode("\n", $cpidcontent);
+  array_shift($cpidlist);
+  $cpidlist = preg_replace('/info:fedora\//', '', $cpidlist);
+  $cpidarray = array();
+  foreach ($cpidlist as $cpiditem) {   //removes  blanks
+    if ($cpiditem) {
+      $cpidparts = explode(',', $cpiditem);
+      array_push($cpidarray, $cpidparts[0]);
+    }
   }
+  
+  $collectionsarray = array_merge ($collectionsarray, $cpidarray);
 
-  $list = array_diff($resultsarray, $collectionsarray);
+  $returnlist = array_diff($everything, $collectionsarray);
 
-  return $list;
+  return $returnlist;
 }
 
 /**
