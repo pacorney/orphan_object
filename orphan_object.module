@@ -283,7 +283,6 @@ function orphan_object_getlist() {
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
 
   $restricted = variable_get('fedora_namespace_restriction_enforced', TRUE);
-  $pregpattern = '/:[0-9]/';
   
   $everythingquery = 'select $object $title from <#ri> where ($object <dc:title> $title)';
   $everythingurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
@@ -296,10 +295,7 @@ function orphan_object_getlist() {
   foreach ($everythinglist as $everythingitem) {   //removes  blanks
     if ($everythingitem) {
       $everythingparts = explode(',', $everythingitem);
-	  if (preg_match($pregpattern, $everythingparts[0]))
-	  {
-	    array_push($everything, $everythingparts[0]);
-	  }
+	  array_push($everything, $everythingparts[0]);
     }
   }
   
