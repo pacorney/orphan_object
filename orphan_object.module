@@ -91,10 +91,10 @@ function orphan_object_formpage($form_state) {
   //$ritestarray = orphan_object_getlist();
   $ritestarray = get_collections_as_option_array();
   
-  foreach ($ritestarray as $rivalue) {
+  foreach ($ritestarray[] as $rivalue) {
     $form['ritest']= array
     (
-      '#value' => <p>$rivalue</p>,
+      '#value' => $rivalue,
     );
   }
 
