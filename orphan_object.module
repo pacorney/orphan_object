@@ -341,10 +341,17 @@ function orphan_object_getlist() {
   
   }
   
+  $allowed_string = variable_get('fedora_pids_allowed', 'default: demo: changeme: islandora:');
+  $namespaces = explode(':', $allowed_string);
+  foreach ($namespaces as $namespace) {
+      if ($namespace) {
+          $allowed[] = trim($namespace);
+      }
+  }  
   $cmodelsquery = 'select $object $title from <#ri>
 						            where ($object <dc:title> $title
                                       and ($object <fedora-model:hasModel> <info:fedora/fedora-system:ContentModel-3.0>
-                                      or $object <fedora-rels-ext:isMemberOfCollection> <info:fedora/islandora:ContentModelsCollection>)
+                                      or $object <fedora-rels-ext:isMemberOfCollection> <info:fedora/islandora:ContentModelsCollection>))
                                     order by $title';
   $cmodelsurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
   $cmodelsurl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
