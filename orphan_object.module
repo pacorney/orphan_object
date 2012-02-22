@@ -385,10 +385,29 @@ function orphan_object_getlist() {
       array_push($smodels, $smodelsparts[0]);
     }
   }
+  
+  $sdeploymentquery = 'select $object $title from <#ri>
+                                where ($object <dc:title> $title
+                                  and ($object <fedora-model:hasModel> <info:fedora/fedora-system:ServiceDeployment-3.0>))
+                                order by $title';
+  $sdeploymenturl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
+  $sdeploymenturl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
+  $sdeploymentcontent = do_curl($sdeploymenturl . htmlentities(urlencode($sdeploymentquery)));
+  $sdeploymentlist = explode("\n", $sdeploymentcontent);
+  array_shift($sdeploymentlist);
+  $sdeploymentlist = preg_replace('/info:fedora\//', '', $sdeploymentlist);
+  $sdeployment = array();
+  foreach ($sdeploymentlist as $sdeploymentitem) {   //removes  blanks
+    if ($sdeploymentitem) {
+      $sdeploymentparts = explode(',', $sdeploymentitem);
+      array_push($sdeployment, $sdeploymentparts[0]);
+    }
+  }
 
   $returnlist = array_diff($everything, $collectionsarray);
   $returnlist = array_diff($returnlist, $cmodels);
   $returnlist = array_diff($returnlist, $smodels);
+  $returnlist = array_diff($returnlist, $sdeployment);
   $returnlist = array_diff($returnlist, $collections);
   
   return $returnlist;
