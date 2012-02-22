@@ -322,20 +322,21 @@ function orphan_object_getlist() {
   
   foreach ($collections as $cpid) {
   
-  $cpidquery = 'select $object $title from <#ri>
-                            where ($object <dc:title> $title
-                              and $object <fedora-rels-ext:isMemberOfCollection><info:fedora/' . $cpid . '>)';
-  $cpidurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
-  $cpidurl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
-  $cpidcontent = do_curl($cpidurl . htmlentities(urlencode($cpidquery)));
-  $cpidlist = explode("\n", $cpidcontent);
-  array_shift($cpidlist);
-  $cpidlist = preg_replace('/info:fedora\//', '', $cpidlist);
-  $cpidarray = array();
-  foreach ($cpidlist as $cpiditem) {   //removes  blanks
-    if ($cpiditem) {
-      $cpidparts = explode(',', $cpiditem);
-      array_push($cpidarray, $cpidparts[0]);
+    $cpidquery = 'select $object $title from <#ri>
+                              where ($object <dc:title> $title
+                                and $object <fedora-rels-ext:isMemberOfCollection><info:fedora/' . $cpid . '>)';
+    $cpidurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
+    $cpidurl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
+    $cpidcontent = do_curl($cpidurl . htmlentities(urlencode($cpidquery)));
+    $cpidlist = explode("\n", $cpidcontent);
+    array_shift($cpidlist);
+    $cpidlist = preg_replace('/info:fedora\//', '', $cpidlist);
+    $cpidarray = array();
+    foreach ($cpidlist as $cpiditem) {   //removes  blanks
+      if ($cpiditem) {
+        $cpidparts = explode(',', $cpiditem);
+        array_push($cpidarray, $cpidparts[0]);
+      }
     }
   }
   
