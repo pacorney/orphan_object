@@ -94,7 +94,7 @@ function orphan_object_formpage($form_state) {
   foreach ($ritestarray as $rivalue) {
     $form[$rivalue]= array
     (
-      '#value' => $rivalue,
+      '#value' => $rivalue + " ",
     );
   }
 
@@ -284,7 +284,8 @@ function orphan_object_getlist() {
 
   $restricted = variable_get('fedora_namespace_restriction_enforced', TRUE);
   
-  $everythingquery = 'select $object $title from <#ri> where ($object <dc:title> $title)';
+  $everythingquery = 'select $object $title from <#ri> 
+                                   where ($object <dc:title> $title)';
   $everythingurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
   $everythingurl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
   $everythingcontent = do_curl($everythingurl . htmlentities(urlencode($everythingquery)));
