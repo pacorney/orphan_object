@@ -87,12 +87,12 @@ function orphan_object_formpage($form_state) {
     '#value' => 'Save Configuration',
   );
   
-  $ritestarray = get_related_items_as_array('islandora:bookCollection', 'isMemberOfCollection');
+  $ritestarray = orphan_object_getlist();
   
   foreach ($ritestarray as $rivalue) {
     $form['ritest']= array
     (
-      '#value' => $orphan['title'],
+      '#value' => $rivalue,
     );
   }
 
