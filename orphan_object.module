@@ -352,29 +352,12 @@ function orphan_object_getlist() {
           $allowed[] = trim($namespace);
       }
   }  
-  $cmodelsquery = 'select $object $title from <#ri>
-						            where ($object <dc:title> $title
-                                      and ($object <fedora-model:hasModel> <info:fedora/fedora-system:ContentModel-3.0>
-                                      or $object <fedora-rels-ext:isMemberOfCollection> <info:fedora/islandora:ContentModelsCollection>))
-                                    order by $title';
-  $cmodelsurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
-  $cmodelsurl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
-  $cmodelscontent = do_curl($cmodelsurl . htmlentities(urlencode($cmodelsquery)));
-  $cmodelslist = explode("\n", $cmodelscontent);
-  array_shift($cmodelslist);
-  $cmodelslist = preg_replace('/info:fedora\//', '', $cmodelslist);
-  $cmodels = array();
-  foreach ($cmodelslist as $cmodelsitem) {   //removes  blanks
-    if ($cmodelsitem) {
-      $cmodelsparts = explode(',', $cmodelsitem);
-      array_push($cmodels, $cmodelsparts[0]);
-    }
-  }
+
 
   $returnlist = array_diff($everything, $collectionsarray);
-  $returnlist = array_diff($returnlist, $cmodels);
+  $returnlist = array_diff($returnlist, $collections);
   
-  return $everything;
+  return $returnlist;
 }
 
 /**
