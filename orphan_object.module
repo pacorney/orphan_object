@@ -326,7 +326,6 @@ function orphan_object_getlist() {
 
   return $list;
 }
-*/
 
 /**
 * Method used to activate orphan fedora objects
