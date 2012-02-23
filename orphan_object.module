@@ -362,12 +362,12 @@ function orphan_object_getlist() {
   //an array to hold all the results of the upcoming foreach
   $objectsarray = array();
   $queryarray = $collectionsarray;
-  $done = False;
+  $done = false;
   
   //used to grab all the objects that are members of the objects held within $collectionsarray
-  while ($done == False)
+  while ($done == false)
   {
-    $changed = False;
+    $changed = false;
     foreach ($queryarray as $opid) {
   
       $opidquery = 'select $object $title from <#ri>
@@ -391,12 +391,12 @@ function orphan_object_getlist() {
 	  if (!empty($opidarray)){
         $objectsarray = array_merge ($objectsarray, $opidarray);
 	    $queryarray = $opidarray;
-		$changed = True;
+		$changed = true;
 	  }
     }
 
-    if (changed == False){
-	  $done = True;
+    if (changed == false){
+	  $done = true;
 	}
   }
   
