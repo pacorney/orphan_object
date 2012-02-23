@@ -367,8 +367,9 @@ function orphan_object_getlist() {
   
   //used to grab all the objects that are members of the objects held within $queryarray and any
   //objects that members of those objects, and so on
-  while ($done > 0))
+  while ($done > 0)
   {
+    //set $done to 0 so that if nothing is done the loop ends
     $done = 0;
     foreach ($queryarray as $opid) {
   
@@ -389,14 +390,14 @@ function orphan_object_getlist() {
         }
       }
 	
-      //if the $opidarray is not empty merge the results into $objectsarray and $nextarray
+      //if the $opidarray is not empty merge the results into $objectsarray and $nextarray, and increase done
 	  if (!empty($opidarray)){
         $objectsarray = array_merge ($objectsarray, $opidarray);
 	    $nextarray = array_merge ($nextarray, $opidarray);
 		$done++;
 	  }
     }
-    //make $queryarray equal to $nextarray, if it is empty the loop will end	
+    //make $queryarray equal to $nextarray	
 	$queryarray = $nextarray;
   }
   
