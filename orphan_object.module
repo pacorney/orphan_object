@@ -388,7 +388,7 @@ function orphan_object_getlist() {
       }
 	
       //merge all the results into one array
-	  if (!empty($opidarray){
+	  if (!empty($opidarray)){
         $objectsarray = array_merge ($objectsarray, $opidarray);
 	    $queryarray = $opidarray;
 		$changed = True;
