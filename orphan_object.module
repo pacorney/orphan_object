@@ -359,15 +359,15 @@ function orphan_object_getlist() {
   
   }
   
-  //an array to hold all the results of the upcoming foreach
+  //set up arrays to be used in upcoming while
   $objectsarray = array();
+  $nextarray = array();
   $queryarray = $collectionsarray;
-  $done = 1;
   
-  //used to grab all the objects that are members of the objects held within $collectionsarray
-  while ($done > 0)
+  //used to grab all the objects that are members of the objects held within $queryarray and any
+  //objects that members of those objects, and so on
+  while (!empty($queryarray))
   {
-    $done = 0;
     foreach ($queryarray as $opid) {
   
       $opidquery = 'select $object $title from <#ri>
@@ -387,13 +387,14 @@ function orphan_object_getlist() {
         }
       }
 	
-      //merge all the results into one array
+      //if the $opidarray is not empty merge the results into $objectsarray and $nextarray
 	  if (!empty($opidarray)){
         $objectsarray = array_merge ($objectsarray, $opidarray);
-	    $queryarray = $opidarray;
-		$done++;
+	    $nextarray = array_merge ($nextarray, $opidarray);
 	  }
     }
+    //make $queryarray equal to $nextarray, if it is empty the loop will end	
+	$queryarray = $nextarray;
   }
   
   //query to grab all the content models  
