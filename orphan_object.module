@@ -278,14 +278,26 @@ function orphan_object_inactivate_fedora_objects($objects, $uid) {
   return $results;
 }
 
+/**
+ * Function: orphan_objects_getlist
+ *
+ * Description: Returns an array containing all the orphan objects in the fedora repository
+ *
+ * @return array
+ */
+
 function orphan_object_getlist() {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
 
   $restricted = variable_get('fedora_namespace_restriction_enforced', TRUE);
   
+  //query grabs everything in the repository
   $everythingquery = 'select $object $title from <#ri> 
                                    where ($object <dc:title> $title)';
+
+  //convert the query into an array, method based off get_collections_as_option_array() from api/fedora_utils.inc  
+  //all other queries use this same method but with different variable names
   $everythingurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
   $everythingurl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
   $everythingcontent = do_curl($everythingurl . htmlentities(urlencode($everythingquery)));
@@ -296,10 +308,11 @@ function orphan_object_getlist() {
   foreach ($everythinglist as $everythingitem) {   //removes  blanks
     if ($everythingitem) {
       $everythingparts = explode(',', $everythingitem);
-	  array_push($everything, $everythingparts[0]);
+	  array_push($everything, $everythingparts[0]);  //place only the pid in the array
     }
   }
   
+  //grabs all the collection pids
   $collectionsquery = 'select $object $title from <#ri>
                             where ($object <dc:title> $title
                               and $object <info:fedora/fedora-system:def/model#hasModel> <info:fedora/islandora:collectionCModel>)
@@ -318,8 +331,10 @@ function orphan_object_getlist() {
     }
   }
   
+  //an array to hold all the results of the upcoming foreach
   $collectionsarray = array();
   
+  //used to grab all the objects that are members of the collections from the previous query
   foreach ($collections as $cpid) {
   
     $cpidquery = 'select $object $title from <#ri>
@@ -338,34 +353,51 @@ function orphan_object_getlist() {
         array_push($cpidarray, $cpidparts[0]);
       }
     }
+	
+  //merge all the results into one array
   $collectionsarray = array_merge ($collectionsarray, $cpidarray);	
   
   }
   
+  //an array to hold all the results of the upcoming foreach
   $objectsarray = array();
+  $queryarray = $collectionsarray;
+  $done = False;
   
-  foreach ($collectionsarray as $opid) {
+  //used to grab all the objects that are members of the objects held within $collectionsarray
+  while ($done = False)
+  {
+    foreach ($queryarray as $opid) {
   
-    $opidquery = 'select $object $title from <#ri>
-                              where ($object <dc:title> $title
-                                and $object <fedora-rels-ext:isMemberOf><info:fedora/' . $opid . '>)';
-    $opidurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
-    $opidurl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
-    $opidcontent = do_curl($opidurl . htmlentities(urlencode($opidquery)));
-    $opidlist = explode("\n", $opidcontent);
-    array_shift($opidlist);
-    $opidlist = preg_replace('/info:fedora\//', '', $opidlist);
-    $opidarray = array();
-    foreach ($opidlist as $opiditem) {   //removes  blanks
-      if ($opiditem) {
-        $opidparts = explode(',', $opiditem);
-        array_push($opidarray, $opidparts[0]);
+      $opidquery = 'select $object $title from <#ri>
+                                where ($object <dc:title> $title
+                                  and $object <fedora-rels-ext:isMemberOf><info:fedora/' . $opid . '>)';
+      $opidurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
+      $opidurl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
+      $opidcontent = do_curl($opidurl . htmlentities(urlencode($opidquery)));
+      $opidlist = explode("\n", $opidcontent);
+      array_shift($opidlist);
+      $opidlist = preg_replace('/info:fedora\//', '', $opidlist);
+      $opidarray = array();
+      foreach ($opidlist as $opiditem) {   //removes  blanks
+        if ($opiditem) {
+          $opidparts = explode(',', $opiditem);
+          array_push($opidarray, $opidparts[0]);
+        }
       }
-    }
-  $objectsarray = array_merge ($objectsarray, $opidarray);	
-  
+	
+      //merge all the results into one array
+	  if (empty($opidarray)){
+	    $done = True;
+	  }
+	  else {
+        $objectsarray = array_merge ($objectsarray, $opidarray);
+	    $queryarray = $opidarray;
+	  }
+    }  
   }
-    
+  
+  //query to grab all the content models  
   $cmodelsquery = 'select $object $title from <#ri>
 						            where ($object <dc:title> $title
                                       and ($object <fedora-model:hasModel> <info:fedora/fedora-system:ContentModel-3.0>
@@ -385,6 +417,7 @@ function orphan_object_getlist() {
     }
   }
   
+  //query to grab all the service models
   $smodelsquery = 'select $object $title from <#ri>
                                 where ($object <dc:title> $title
                                   and ($object <fedora-model:hasModel> <info:fedora/fedora-system:ServiceDefinition-3.0>))
@@ -403,6 +436,7 @@ function orphan_object_getlist() {
     }
   }
   
+  //query to grab all the service deployment
   $sdeploymentquery = 'select $object $title from <#ri>
                                 where ($object <dc:title> $title
                                   and ($object <fedora-model:hasModel> <info:fedora/fedora-system:ServiceDeployment-3.0>))
@@ -421,6 +455,8 @@ function orphan_object_getlist() {
     }
   }
 
+  //Whole bunch of array_diffs using the arrays created from all the previous operations
+  //removes everything that isn't an orphan and returns only the orphans
   $returnlist = array_diff($everything, $collectionsarray);
   $returnlist = array_diff($returnlist, $objectsarray);
   $returnlist = array_diff($returnlist, $cmodels);
