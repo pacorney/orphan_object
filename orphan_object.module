@@ -464,7 +464,7 @@ function orphan_object_getlist() {
   $returnlist = array_diff($returnlist, $sdeployment);
   $returnlist = array_diff($returnlist, $collections);
   
-  return $returnlist;
+  return $queryarray;
 }
 
 /**
