@@ -389,6 +389,8 @@ function orphan_object_getlist() {
       //merge all the results into one array
 	  if (empty($opidarray)){
 	    $done = True;
+		$objectsarray = array_merge ($objectsarray, $opidarray);
+	    $queryarray = $opidarray;
 	  }
 	  else {
         $objectsarray = array_merge ($objectsarray, $opidarray);
@@ -464,7 +466,7 @@ function orphan_object_getlist() {
   $returnlist = array_diff($returnlist, $sdeployment);
   $returnlist = array_diff($returnlist, $collections);
   
-  return $queryarray;
+  return $objectsarray;
 }
 
 /**
