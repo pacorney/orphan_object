@@ -365,7 +365,7 @@ function orphan_object_getlist() {
   $done = false;
   
   //used to grab all the objects that are members of the objects held within $collectionsarray
-  while ($done == false)
+  while ($done = false)
   {
     $changed = false;
     foreach ($queryarray as $opid) {
