@@ -367,6 +367,7 @@ function orphan_object_getlist() {
   //used to grab all the objects that are members of the objects held within $collectionsarray
   while ($done = False)
   {
+    $changed = False;
     foreach ($queryarray as $opid) {
   
       $opidquery = 'select $object $title from <#ri>
@@ -387,14 +388,16 @@ function orphan_object_getlist() {
       }
 	
       //merge all the results into one array
-	  if (empty($opidarray)){
-	    $done = True;
-	  }
-	  else {
+	  if (!empty($opidarray){
         $objectsarray = array_merge ($objectsarray, $opidarray);
 	    $queryarray = $opidarray;
+		$changed = True;
 	  }
-    }  
+    }
+
+    if (changed == False){
+	  $done = True;
+	}
   }
   
   //query to grab all the content models  
