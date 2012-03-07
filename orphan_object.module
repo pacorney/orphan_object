@@ -183,7 +183,7 @@ function theme_orphan_object_theme($form) {
   $output = theme('table', $header, $rows);
   $output .= drupal_render($form);
   
-  $limit = 20;
+  $limit = 1;
   $element = 0;
   $pager_total_items[$element] = $total_records;
   $pager_total[$element] = ceil($pager_total_items[$element]/$limit);
