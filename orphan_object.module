@@ -181,8 +181,6 @@ function theme_orphan_object_theme($form) {
   }
   
   $output = theme('table', $header, $rows);
-  $output .= drupal_render($form);
-  
   $limit = 1;
   $element = 0;
   $pager_total_items[$element] = $total_records;
@@ -190,6 +188,8 @@ function theme_orphan_object_theme($form) {
   $pager_page_array[$element] = max(0, min((int)$pager_page_array[$element], ((int)$pager_total[$element]) -1));
   
   $output .= theme('pager', NULL, limit, 0);
+  $output .= drupal_render($form);
+  
   return $output;
   
   /*//set as a table theme and return the output
