@@ -101,8 +101,13 @@ function orphan_object_formpage($form_state) {
   $fedora_item = new Fedora_Item($resultitem);
     //check to see if the fedora object exists, if exists 1 is returned.
     if ($fedora_item->exists()) {
-      print_r($fedora_item->Objectprofile);
+      $item = $fedora_item->Objectprofile->objLabel;
 	}
+  
+  $form['values'] = array(
+    '#value' => print_r($item),
+  );
+  
 
   //Set form submit and theme
   $form['#submit'][] = 'orphan_object_formpage_submit';
