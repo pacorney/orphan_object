@@ -67,20 +67,24 @@ function orphan_object_formpage($form_state) {
   // Creates an array to hold the values to be used to create the form elements
   $orphans = array
   (
-    array('oid' => 0, 'title' => '<a href = "http://192.168.56.195/fedora/repository/islandora:2216/-/Heart%20Beat">Heart Beat</a>', 'identifier' => 'islandora:2216'),
-    array('oid' => 1, 'title' => '<a href = "http://192.168.56.195/fedora/repository/islandora:2221/-/Elmsdale">Elmsdale</a>', 'identifier' => 'islandora:2221'),
+    array('oid' => 0, 'pid' => 'islandora:2216', 'state' => 'A', 'logmessage' => 'Message'),
+    array('oid' => 1, 'pid' => 'islandora:2224', 'state' => 'D', 'logmessage' => 'Deleted'),
   );
 
   // Creates elements from the above values and sets up an array for the checkboxes
   foreach ($orphans as $orphan) {
     $active[$orphan['oid']] = '';
-    $form[$orphan['oid']]['title'] = array
+    $form[$orphan['oid']]['pid'] = array
     (
-      '#value' => $orphan['title'],
+      '#value' => $orphan['pid'],
     );
-    $form[$orphan['oid']]['identifier'] = array
+    $form[$orphan['oid']]['state'] = array
     (
-      '#value' => $orphan['identifier'],
+      '#value' => $orphan['state'],
+    );
+	$form[$orphan['oid']]['logmessage'] = array
+    (
+      '#value' => $orphan['logmessage'],
     );
   }
 
@@ -94,7 +98,7 @@ function orphan_object_formpage($form_state) {
   // Creates the Save Configuration button
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => 'Save Configuration',
+    '#value' => 'Manage Selected Object(s)',
   );
   
   $resultsarray = orphan_object_getlist();
@@ -120,7 +124,6 @@ function orphan_object_formpage($form_state) {
 function orphan_object_formpage_submit($form, &$form_state) {
   global $user;
   $uid = $user->uid;
-  
   drupal_set_message(t('The update has been performed.'));
   
 }
@@ -144,24 +147,29 @@ function orphan_object_theme() {
 */
 
 function theme_orphan_object_theme($form) {
+  global $pager_page_array, $pager_total, $pager_total_items;
+  $page = isset($_GET['page']) ? $_GET['page'] : '';
+  $pager_page_array = explode(',', $page);
+    
   $rows = array();
 
   //Creates the table rows
   foreach (element_children($form['active']) as $oid) {
     $row = array();
     $row[] = drupal_render($form['active'][$oid]);
-    $row[] = drupal_render($form[$oid]['title']);
-    $row[] = drupal_render($form[$oid]['identifier']);
+    $row[] = drupal_render($form[$oid]['pid']);
+    $row[] = drupal_render($form[$oid]['state']);
+	$row[] = drupal_render($form[$oid]['logmessage']);
     $rows[] = $row;
   }
 
   //if there are rows add these headers
   if (count($rows)) {
-    $header = array(t('Active'), t('Object Title'), t('Identifier'));
+    $header = array(t('Manage Object'), t('Object PID'), t('Object State'), t('Last Log Message'));
   }
   //otherwise add these headers and give this message
   else {
-    $header = array(t('Active'), t('Object Title'), t('Identifier'));
+    $header = array(t('Manage Object'), t('Object PID'), t('Object State'), t('Last Log Message'));
     $row = array();
     $row[] = array
     (
@@ -171,12 +179,24 @@ function theme_orphan_object_theme($form) {
     );
     $rows[] = $row;
   }
-
-  //set as a table theme and return the output
+  
+  $output = theme('table', $header, $rows);
+  $output .= drupal_render($form);
+  
+  $limit = 20;
+  $element = 0;
+  $pager_total_items[$element] = $total_records;
+  $pager_total[$element] = ceil($pager_total_items[$element]/$limit);
+  $pager_page_array[$element] = max(0, min((int)$pager_page_array[$element], ((int)$pager_total[$element]) -1));
+  
+  $output .= theme('pager', NULL, limit, 0);
+  
+  /*//set as a table theme and return the output
   $output = theme('table', $header, $rows);
   $output .= drupal_render($form);
   return $output;
-}
+  */
+  }
 
 /**
 * Method used to delete orphan fedora objects
