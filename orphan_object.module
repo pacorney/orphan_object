@@ -52,9 +52,17 @@ function orphan_object_form() {
 * Builds the orphan_object form.
 */
 function orphan_object_formpage($form_state) {
-
-  module_load_include('inc', 'fedora_repository', 'api/fedora_collection');
-  module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
+  
+  $resultsarray = orphan_object_getlist();
+  
+  foreach ($resultsarray as $resultitem) {
+    $fedora_item = new Fedora_Item($resultitem);
+    //check to see if the fedora object exists, if exists 1 is returned.
+    if ($fedora_item->exists()) {
+      printr($item = $fedora_item->Objectprofile);
+	}
+  }
+  $orphancount = 0;
   // Creates an array to hold the values to be used to create the form elements
   $orphans = array
   (
@@ -88,15 +96,6 @@ function orphan_object_formpage($form_state) {
     '#value' => 'Save Configuration',
   );
   
-  $ritestarray = orphan_object_getlist();
-  //$ritestarray = get_collections_as_option_array();
-  
-  foreach ($ritestarray as $rivalue) {
-    $form[$rivalue]= array
-    (
-      '#value' => '<p>' . $rivalue . '</p>',
-    );
-  }
 
   //Set form submit and theme
   $form['#submit'][] = 'orphan_object_formpage_submit';
@@ -112,7 +111,6 @@ function orphan_object_formpage($form_state) {
 function orphan_object_formpage_submit($form, &$form_state) {
   global $user;
   $uid = $user->uid;
-  variable_set('orphan_object_formpage_values', $form_state['values']['active']);
   drupal_set_message(t('The update has been performed.'));
 }
 
@@ -289,184 +287,63 @@ function orphan_object_inactivate_fedora_objects($objects, $uid) {
 function orphan_object_getlist() {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
-
-  $restricted = variable_get('fedora_namespace_restriction_enforced', TRUE);
   
-  //query grabs everything in the repository
-  $everythingquery = 'select $object $title from <#ri> 
-                                   where ($object <dc:title> $title)';
-
-  //convert the query into an array, method based off get_collections_as_option_array() from api/fedora_utils.inc  
-  //all other queries use this same method but with different variable names
-  $everythingurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
-  $everythingurl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
-  $everythingcontent = do_curl($everythingurl . htmlentities(urlencode($everythingquery)));
-  $everythinglist = explode("\n", $everythingcontent);
-  array_shift($everythinglist);
-  $everythinglist = preg_replace('/info:fedora\//', '', $everythinglist);
-  $everything = array();
-  foreach ($everythinglist as $everythingitem) {   //removes  blanks
-    if ($everythingitem) {
-      $everythingparts = explode(',', $everythingitem);
-	  array_push($everything, $everythingparts[0]);  //place only the pid in the array
-    }
-  }
-  
-  //grabs all the collection pids
-  $collectionsquery = 'select $object $title from <#ri>
+  $collectionquery = 'select $object $title from <#ri>
                             where ($object <dc:title> $title
-                              and $object <info:fedora/fedora-system:def/model#hasModel> <info:fedora/islandora:collectionCModel>)
-                            order by $title';
-  $collectionsurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
-  $collectionsurl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
-  $collectionscontent = do_curl($collectionsurl . htmlentities(urlencode($collectionsquery)));
-  $collectionslist = explode("\n", $collectionscontent);
-  array_shift($collectionslist);
-  $collectionslist = preg_replace('/info:fedora\//', '', $collectionslist);
-  $collections = array();
-  foreach ($collectionslist as $collectionsitem) {   //removes  blanks
-    if ($collectionsitem) {
-      $collectionsparts = explode(',', $collectionsitem);
-      array_push($collections, $collectionsparts[0]);
+                              and $object <fedora-rels-ext:isMemberOfCollection><info:fedora/islandora:2297>)';
+  $collectionurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
+  $collectionurl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
+  $collectioncontent = do_curl($collectionurl . htmlentities(urlencode($collectionquery)));
+  $collectionlist = explode("\n", $collectioncontent);
+  array_shift($collectionlist);
+  $collectionlist = preg_replace('/info:fedora\//', '', $collectionlist);
+  $ccollectionarray = array();
+  foreach ($collectionlist as $collectionitem) {   //removes  blanks
+    if ($collectionitem) {
+      $collectionparts = explode(',', $collectionitem);
+      array_push($collectionarray, $collectionparts[0]);
     }
   }
   
-  //an array to hold all the results of the upcoming foreach
-  $collectionsarray = array();
+  $nidarray = array();
+  $existingnodes = array();
+  $nonexistingnodes = array();
+  $pidarray = array();
+  $nidcount = 0;
+  $pidcount = 0;
+  $existcount = 0;
+  $nonexistcount = 0;
   
-  //used to grab all the objects that are members of the collections from the previous query
-  foreach ($collections as $cpid) {
+  $results = db_query("SELECT nid FROM {node_fedora_objects}");
   
-    $cpidquery = 'select $object $title from <#ri>
-                              where ($object <dc:title> $title
-                                and $object <fedora-rels-ext:isMemberOfCollection><info:fedora/' . $cpid . '>)';
-    $cpidurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
-    $cpidurl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
-    $cpidcontent = do_curl($cpidurl . htmlentities(urlencode($cpidquery)));
-    $cpidlist = explode("\n", $cpidcontent);
-    array_shift($cpidlist);
-    $cpidlist = preg_replace('/info:fedora\//', '', $cpidlist);
-    $cpidarray = array();
-    foreach ($cpidlist as $cpiditem) {   //removes  blanks
-      if ($cpiditem) {
-        $cpidparts = explode(',', $cpiditem);
-        array_push($cpidarray, $cpidparts[0]);
-      }
-    }
-	
-  //merge all the results into one array
-  $collectionsarray = array_merge ($collectionsarray, $cpidarray);	
-  
+  while ($row = db_fetch_object($results)){
+    $nidarray[$nidcount] = $row->nid;	
+	$nidcount++;
   }
   
-  //set up variables to be used in upcoming while
-  $objectsarray = array();
-  $nextarray = array();
-  $queryarray = $collectionsarray;
-  $done = 1;
-  
-  //used to grab all the objects that are members of the objects held within $queryarray and any
-  //objects that members of those objects, and so on
-  while ($done > 0)
-  {
-    //set $done to 0 so that if nothing is done the loop ends
-    $done = 0;
-    foreach ($queryarray as $opid) {
-  
-      $opidquery = 'select $object $title from <#ri>
-                                where ($object <dc:title> $title
-                                  and $object <fedora-rels-ext:isMemberOf><info:fedora/' . $opid . '>)';
-      $opidurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
-      $opidurl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
-      $opidcontent = do_curl($opidurl . htmlentities(urlencode($opidquery)));
-      $opidlist = explode("\n", $opidcontent);
-      array_shift($opidlist);
-      $opidlist = preg_replace('/info:fedora\//', '', $opidlist);
-      $opidarray = array();
-      foreach ($opidlist as $opiditem) {   //removes  blanks
-        if ($opiditem) {
-          $opidparts = explode(',', $opiditem);
-          array_push($opidarray, $opidparts[0]);
-        }
-      }
-	
-      //if the $opidarray is not empty merge the results into $objectsarray and $nextarray, and increase done
-	  if (!empty($opidarray)){
-        $objectsarray = array_merge ($objectsarray, $opidarray);
-	    $nextarray = array_merge ($nextarray, $opidarray);
-		$done++;
-	  }
-    }
-    //make $queryarray equal to $nextarray	
-	$queryarray = $nextarray;
+  foreach ($nidarray as $checknid){
+	$test_node = node_load($checknid);
+	if ($test_node != false){
+	  $existingnodes[$existingcount] = $checknid;
+	  $existcount++;
+	}
+	else if ($test_node == false){
+	  $nonexistingnodes[$nonexistcount] = $checknid;
+	  $nonexistcount++;
+	}
   }
   
-  //query to grab all the content models  
-  $cmodelsquery = 'select $object $title from <#ri>
-						            where ($object <dc:title> $title
-                                      and ($object <fedora-model:hasModel> <info:fedora/fedora-system:ContentModel-3.0>
-                                      or $object <fedora-rels-ext:isMemberOfCollection> <info:fedora/islandora:ContentModelsCollection>))
-                                    order by $title';
-  $cmodelsurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
-  $cmodelsurl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
-  $cmodelscontent = do_curl($cmodelsurl . htmlentities(urlencode($cmodelsquery)));
-  $cmodelslist = explode("\n", $cmodelscontent);
-  array_shift($cmodelslist);
-  $cmodelslist = preg_replace('/info:fedora\//', '', $cmodelslist);
-  $cmodels = array();
-  foreach ($cmodelslist as $cmodelsitem) {   //removes  blanks
-    if ($cmodelsitem) {
-      $cmodelsparts = explode(',', $cmodelsitem);
-      array_push($cmodels, $cmodelsparts[0]);
-    }
-  }
-  
-  //query to grab all the service models
-  $smodelsquery = 'select $object $title from <#ri>
-                                where ($object <dc:title> $title
-                                  and ($object <fedora-model:hasModel> <info:fedora/fedora-system:ServiceDefinition-3.0>))
-                                order by $title';
-  $smodelsurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
-  $smodelsurl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
-  $smodelscontent = do_curl($smodelsurl . htmlentities(urlencode($smodelsquery)));
-  $smodelslist = explode("\n", $smodelscontent);
-  array_shift($smodelslist);
-  $smodelslist = preg_replace('/info:fedora\//', '', $smodelslist);
-  $smodels = array();
-  foreach ($smodelslist as $smodelsitem) {   //removes  blanks
-    if ($smodelsitem) {
-      $smodelsparts = explode(',', $smodelsitem);
-      array_push($smodels, $smodelsparts[0]);
-    }
-  }
-  
-  //query to grab all the service deployment
-  $sdeploymentquery = 'select $object $title from <#ri>
-                                where ($object <dc:title> $title
-                                  and ($object <fedora-model:hasModel> <info:fedora/fedora-system:ServiceDeployment-3.0>))
-                                order by $title';
-  $sdeploymenturl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
-  $sdeploymenturl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
-  $sdeploymentcontent = do_curl($sdeploymenturl . htmlentities(urlencode($sdeploymentquery)));
-  $sdeploymentlist = explode("\n", $sdeploymentcontent);
-  array_shift($sdeploymentlist);
-  $sdeploymentlist = preg_replace('/info:fedora\//', '', $sdeploymentlist);
-  $sdeployment = array();
-  foreach ($sdeploymentlist as $sdeploymentitem) {   //removes  blanks
-    if ($sdeploymentitem) {
-      $sdeploymentparts = explode(',', $sdeploymentitem);
-      array_push($sdeployment, $sdeploymentparts[0]);
-    }
+  $placeholders = db_placeholders($existingnodes);
+  $results = db_query("SELECT f.pid FROM {node_fedora_objects} f WHERE f.nid IN ($placeholders)", $existingnodes)
+
+  while ($row = db_fetch_object($results)){
+    $pidarray[$databasecount] = $row->pid;
+	$pidcount++;
   }
 
-  //Whole bunch of array_diffs using the arrays created from all the previous operations
-  //removes everything that isn't an orphan and returns only the orphans
-  $returnlist = array_diff($everything, $collectionsarray);
-  $returnlist = array_diff($returnlist, $objectsarray);
-  $returnlist = array_diff($returnlist, $cmodels);
-  $returnlist = array_diff($returnlist, $smodels);
-  $returnlist = array_diff($returnlist, $sdeployment);
-  $returnlist = array_diff($returnlist, $collections);
+  $returnlist = array_diff($collectionarray, $pidarray);
+  $nonexistlist = array_intersect($collectionarray, $nonexistingnodes);
+  $returnlist = array_merge($returnlist, $nonexistlist);
   
   return $returnlist;
 }
