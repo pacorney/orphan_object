@@ -347,7 +347,7 @@ function orphan_object_getlist() {
   if(!empty($existingnodes)){
   
     $placeholders = db_placeholders($existingnodes);
-    $pidresults = db_query("SELECT f.pid FROM {node_fedora_objects} f WHERE f.nid IN ($placeholders)", $existingnodes)
+    $pidresults = db_query("SELECT f.pid FROM {node_fedora_objects} f WHERE f.nid IN ($placeholders)", $existingnodes);
 
     while ($row = db_fetch_object($pidresults)){
       $pidarray[$databasecount] = $row->pid;
