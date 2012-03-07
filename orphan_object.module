@@ -299,6 +299,8 @@ function orphan_object_getlist() {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
   
+  $collectionarray = array();
+  
   $collectionquery = 'select $object $title from <#ri>
                             where ($object <dc:title> $title
                               and $object <fedora-rels-ext:isMemberOfCollection><info:fedora/islandora:2297>)';
@@ -317,6 +319,7 @@ function orphan_object_getlist() {
   }
   
   $nidarray = array();
+  $pidarray = array();
   $existingnodes = array();
   $nonexistingnodes = array();
   $pidarray = array();
