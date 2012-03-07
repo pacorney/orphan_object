@@ -70,6 +70,8 @@ function orphan_object_formpage($form_state) {
     array('oid' => 0, 'pid' => 'islandora:2216', 'state' => 'A', 'logmessage' => 'Message'),
     array('oid' => 1, 'pid' => 'islandora:2224', 'state' => 'D', 'logmessage' => 'Deleted'),
   );
+  
+  drupal_add_css(drupal_get_path('module', 'orphan_object') .'/orphan_object.css');
 
   // Creates elements from the above values and sets up an array for the checkboxes
   foreach ($orphans as $orphan) {
@@ -109,6 +111,8 @@ function orphan_object_formpage($form_state) {
       '#value' => $result,
     );
   }
+  
+  
 
   //Set form submit and theme
   $form['#submit'][] = 'orphan_object_formpage_submit';
