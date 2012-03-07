@@ -51,7 +51,10 @@ function orphan_object_form() {
 /**
 * Builds the orphan_object form.
 */
-function orphan_object_formpage($form_state) {
+function orphan_object_formpage($form_state) { 
+  global $pager_page_array, $pager_total, $pager_total_items;
+  $page = isset($_GET['page']) ? $_GET['page'] : '';
+  $pager_page_array = explode(',', $page);
   
   //$resultsarray = orphan_object_getlist();
   /*
@@ -70,6 +73,12 @@ function orphan_object_formpage($form_state) {
     array('oid' => 0, 'pid' => 'islandora:2216', 'state' => 'A', 'logmessage' => 'Message'),
     array('oid' => 1, 'pid' => 'islandora:2224', 'state' => 'D', 'logmessage' => 'Deleted'),
   );
+  
+  $limit = 1;
+  $element = 0;
+  $pager_total_items[$element] = 2;
+  $pager_total[$element] = ceil($pager_total_items[$element]/$limit);
+  $pager_page_array[$element] = max(0, min((int)$pager_page_array[$element], ((int)$pager_total[$element]) -1));
 
   // Creates elements from the above values and sets up an array for the checkboxes
   foreach ($orphans as $orphan) {
@@ -100,6 +109,8 @@ function orphan_object_formpage($form_state) {
     '#type' => 'submit',
     '#value' => 'Manage Selected Object(s)',
   );
+  
+  $form['pager'] = array('#value' => theme('pager', NULL, 50, 0));
   
   $resultsarray = orphan_object_getlist();
   
@@ -147,11 +158,7 @@ function orphan_object_theme() {
 */
 
 function theme_orphan_object_theme($form) {
-  /*
-  global $pager_page_array, $pager_total, $pager_total_items;
-  $page = isset($_GET['page']) ? $_GET['page'] : '';
-  $pager_page_array = explode(',', $page);
-  */  
+  
   $rows = array();
 
   //Creates the table rows
@@ -180,23 +187,12 @@ function theme_orphan_object_theme($form) {
     );
     $rows[] = $row;
   }
-  $output = theme('table', $header, $rows);
-  /*
-  $limit = 1;
-  $element = 0;
-  $pager_total_items[$element] = $total_records;
-  $pager_total[$element] = ceil($pager_total_items[$element]/$limit);
-  $pager_page_array[$element] = max(0, min((int)$pager_page_array[$element], ((int)$pager_total[$element]) -1));
-  */
-  $output .= drupal_render($form['submit']);
-  $output .= theme('pager', 1);
-  return $output;
   
-  /*//set as a table theme and return the output
+  //set as a table theme and return the output
   $output = theme('table', $header, $rows);
   $output .= drupal_render($form);
   return $output;
-  */
+  
   }
 
 /**
