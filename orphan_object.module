@@ -185,8 +185,8 @@ function theme_orphan_object_theme($form) {
   $pager_total_items[$element] = 2;
   $pager_total[$element] = ceil($pager_total_items[$element]/$limit);
   $pager_page_array[$element] = max(0, min((int)$pager_page_array[$element], ((int)$pager_total[$element]) -1));
-  $output .= drupal_render($form['submit']);
-  $output .= theme('pager', 1);
+  $output .= theme('pager', NULL, 1, 0);
+  $output .= drupal_render($form);
   return $output;
   
   /*//set as a table theme and return the output
