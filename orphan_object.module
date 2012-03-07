@@ -102,7 +102,7 @@ function orphan_object_formpage($form_state) {
   foreach ($resultsarray as $result) {
     $form[$result] = array
     (
-      '#value' => <p>$result</p>,
+      '#value' => $result,
     );
   }
 
