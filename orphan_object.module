@@ -97,17 +97,14 @@ function orphan_object_formpage($form_state) {
     '#value' => 'Save Configuration',
   );
   
-  $resultitem = 'islandora:2337';
-  $fedora_item = new Fedora_Item($resultitem);
-    //check to see if the fedora object exists, if exists 1 is returned.
-    if ($fedora_item->exists()) {
-      $item = $fedora_item->Objectprofile->objLabel;
-	}
+  $resultsarray = orphan_object_getlist();
   
-  $form['values'] = array(
-    '#value' => $item,
-  );
-  
+  foreach ($resultsarray as $result) {
+    $form[$result] = array
+    (
+      '#value' => <p>$result</p>,
+    );
+  }
 
   //Set form submit and theme
   $form['#submit'][] = 'orphan_object_formpage_submit';
@@ -123,6 +120,7 @@ function orphan_object_formpage($form_state) {
 function orphan_object_formpage_submit($form, &$form_state) {
   global $user;
   $uid = $user->uid;
+  
   drupal_set_message(t('The update has been performed.'));
   
 }
@@ -296,7 +294,7 @@ function orphan_object_inactivate_fedora_objects($objects, $uid) {
  *
  * @return array
  */
- /*
+ 
 function orphan_object_getlist() {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
@@ -346,12 +344,15 @@ function orphan_object_getlist() {
 	}
   }
   
-  $placeholders = db_placeholders($existingnodes);
-  $pidresults = db_query("SELECT f.pid FROM {node_fedora_objects} f WHERE f.nid IN ($placeholders)", $existingnodes)
+  if(!empty($existingnodes)){
+  
+    $placeholders = db_placeholders($existingnodes);
+    $pidresults = db_query("SELECT f.pid FROM {node_fedora_objects} f WHERE f.nid IN ($placeholders)", $existingnodes)
 
-  while ($row = db_fetch_object($pidresults)){
-    $pidarray[$databasecount] = $row->pid;
-	$pidcount++;
+    while ($row = db_fetch_object($pidresults)){
+      $pidarray[$databasecount] = $row->pid;
+	  $pidcount++;
+    }
   }
 
   $returnlist = array_diff($collectionarray, $pidarray);
@@ -359,7 +360,7 @@ function orphan_object_getlist() {
   $returnlist = array_merge($returnlist, $nonexistlist);
   
   return $returnlist;
-}*/
+}
 
 /**
 * Method used to activate orphan fedora objects
