@@ -94,6 +94,8 @@ function orphan_object_formpage($form_state) {
     '#options' => $active,
     '#default_value' => variable_get('orphan_object_formpage_values', array(0, 1)),
   );
+  
+  $form['pager'] = array('#value' => theme('pager', NULL, 1, 0));
 
   // Creates the Save Configuration button
   $form['submit'] = array(
@@ -113,6 +115,7 @@ function orphan_object_formpage($form_state) {
   //Set form submit and theme
   $form['#submit'][] = 'orphan_object_formpage_submit';
   $form['#theme'] = 'orphan_object_theme';
+  
 
   return $form;
 }
@@ -146,10 +149,7 @@ function orphan_object_theme() {
 * Sets the theme.
 */
 
-function theme_orphan_object_theme($form) {
-  global $pager_page_array, $pager_total, $pager_total_items;
-  $page = isset($_GET['page']) ? $_GET['page'] : '';
-  $pager_page_array = explode(',', $page);
+function theme_orphan_object_theme($form) { 
     
   $rows = array();
 
@@ -180,23 +180,10 @@ function theme_orphan_object_theme($form) {
     $rows[] = $row;
   }
   
-  $output = theme('table', $header, $rows);
-  $limit = 1;
-  $element = 0;
-  $pager_total_items[$element] = $total_records;
-  $pager_total[$element] = ceil($pager_total_items[$element]/$limit);
-  $pager_page_array[$element] = max(0, min((int)$pager_page_array[$element], ((int)$pager_total[$element]) -1));
-  
-  $output .= theme('pager', NULL, limit, 0);
-  $output .= drupal_render($form);
-  
-  return $output;
-  
-  /*//set as a table theme and return the output
+  //set as a table theme and return the output
   $output = theme('table', $header, $rows);
   $output .= drupal_render($form);
   return $output;
-  */
   }
 
 /**
