@@ -53,8 +53,8 @@ function orphan_object_form() {
 */
 function orphan_object_formpage($form_state) {
   
-  $resultsarray = orphan_object_getlist();
-  
+  //$resultsarray = orphan_object_getlist();
+  /*
   foreach ($resultsarray as $resultitem) {
     $fedora_item = new Fedora_Item($resultitem);
     //check to see if the fedora object exists, if exists 1 is returned.
@@ -62,6 +62,7 @@ function orphan_object_formpage($form_state) {
       printr($item = $fedora_item->Objectprofile);
 	}
   }
+  */
   $orphancount = 0;
   // Creates an array to hold the values to be used to create the form elements
   $orphans = array
@@ -112,6 +113,12 @@ function orphan_object_formpage_submit($form, &$form_state) {
   global $user;
   $uid = $user->uid;
   drupal_set_message(t('The update has been performed.'));
+  $resultitem = 'islandora:2337';
+  $fedora_item = new Fedora_Item($resultitem);
+    //check to see if the fedora object exists, if exists 1 is returned.
+    if ($fedora_item->exists()) {
+      printr($item = $fedora_item->Objectprofile);
+	}
 }
 
 /**
@@ -283,7 +290,7 @@ function orphan_object_inactivate_fedora_objects($objects, $uid) {
  *
  * @return array
  */
-
+ /*
 function orphan_object_getlist() {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
@@ -334,9 +341,9 @@ function orphan_object_getlist() {
   }
   
   $placeholders = db_placeholders($existingnodes);
-  $results = db_query("SELECT f.pid FROM {node_fedora_objects} f WHERE f.nid IN ($placeholders)", $existingnodes)
+  $pidresults = db_query("SELECT f.pid FROM {node_fedora_objects} f WHERE f.nid IN ($placeholders)", $existingnodes)
 
-  while ($row = db_fetch_object($results)){
+  while ($row = db_fetch_object($pidresults)){
     $pidarray[$databasecount] = $row->pid;
 	$pidcount++;
   }
@@ -346,7 +353,7 @@ function orphan_object_getlist() {
   $returnlist = array_merge($returnlist, $nonexistlist);
   
   return $returnlist;
-}
+}*/
 
 /**
 * Method used to activate orphan fedora objects
