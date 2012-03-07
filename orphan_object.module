@@ -117,7 +117,7 @@ function orphan_object_formpage_submit($form, &$form_state) {
   $fedora_item = new Fedora_Item($resultitem);
     //check to see if the fedora object exists, if exists 1 is returned.
     if ($fedora_item->exists()) {
-      printr($item = $fedora_item->Objectprofile);
+      print_r($item = $fedora_item->Objectprofile);
 	}
 }
 
