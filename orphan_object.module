@@ -63,6 +63,8 @@ function orphan_object_formpage($form_state) {
 	}
   }
   */
+  drupal_add_css(drupal_get_path('module', 'orphan_object') .'/orphan_object.css');
+  
   $orphancount = 0;
   // Creates an array to hold the values to be used to create the form elements
   $orphans = array
@@ -154,8 +156,6 @@ function theme_orphan_object_theme($form) {
   $pager_page_array = explode(',', $page);
     
   $rows = array();
-  
-  drupal_add_css(drupal_get_path('module', 'orphan_object') .'/orphan_object.css');
 
   //Creates the table rows
   foreach (element_children($form['active']) as $oid) {
