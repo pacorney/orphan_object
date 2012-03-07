@@ -147,10 +147,11 @@ function orphan_object_theme() {
 */
 
 function theme_orphan_object_theme($form) {
+  /*
   global $pager_page_array, $pager_total, $pager_total_items;
   $page = isset($_GET['page']) ? $_GET['page'] : '';
   $pager_page_array = explode(',', $page);
-    
+  */  
   $rows = array();
 
   //Creates the table rows
@@ -179,16 +180,16 @@ function theme_orphan_object_theme($form) {
     );
     $rows[] = $row;
   }
-  
+  /*
   $output = theme('table', $header, $rows);
   $limit = 1;
   $element = 0;
   $pager_total_items[$element] = $total_records;
   $pager_total[$element] = ceil($pager_total_items[$element]/$limit);
   $pager_page_array[$element] = max(0, min((int)$pager_page_array[$element], ((int)$pager_total[$element]) -1));
-  
-  $output .= theme('pager', NULL, limit, 0);
-  $output .= drupal_render($form);
+  */
+  $output .= drupal_render($form['submit']);
+  $output .= theme('pager', 1);
   return $output;
   
   /*//set as a table theme and return the output
