@@ -97,6 +97,17 @@ function orphan_object_formpage($form_state) {
     '#value' => 'Save Configuration',
   );
   
+  $resultitem = 'islandora:2337';
+  $fedora_item = new Fedora_Item($resultitem);
+    //check to see if the fedora object exists, if exists 1 is returned.
+    if ($fedora_item->exists()) {
+      $item = $fedora_item->Objectprofile;
+	}
+  
+  $form['values'] = array(
+    '#value' => $item,
+  );
+  
 
   //Set form submit and theme
   $form['#submit'][] = 'orphan_object_formpage_submit';
@@ -113,12 +124,7 @@ function orphan_object_formpage_submit($form, &$form_state) {
   global $user;
   $uid = $user->uid;
   drupal_set_message(t('The update has been performed.'));
-  $resultitem = 'islandora:2337';
-  $fedora_item = new Fedora_Item($resultitem);
-    //check to see if the fedora object exists, if exists 1 is returned.
-    if ($fedora_item->exists()) {
-      print_r($item = $fedora_item->Objectprofile);
-	}
+  
 }
 
 /**
