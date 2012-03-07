@@ -52,6 +52,9 @@ function orphan_object_form() {
 * Builds the orphan_object form.
 */
 function orphan_object_formpage($form_state) {
+  global $pager_page_array, $pager_total, $pager_total_items;
+  $page = isset($_GET['page']) ? $_GET['page'] : '';
+  $pager_page_array = explode(',', $page);
   
   //$resultsarray = orphan_object_getlist();
   /*
@@ -95,7 +98,13 @@ function orphan_object_formpage($form_state) {
     '#default_value' => variable_get('orphan_object_formpage_values', array(0, 1)),
   );
   
-  $form['pager'] = array('#value' => theme('pager', NULL, 1, 0));
+  $limit = 1;
+  $element = 0;
+  $pager_total_items[$element] = $total_records;
+  $pager_total[$element] = ceil($pager_total_items[$element]/$limit);
+  $pager_page_array[$element] = max(0, min((int)$pager_page_array[$element], ((int)$pager_total[$element]) -1));
+  
+  $form['pager'] = array('#value' => theme('pager', NULL, $limit, $element));
 
   // Creates the Save Configuration button
   $form['submit'] = array(
