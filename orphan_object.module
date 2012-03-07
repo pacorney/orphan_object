@@ -180,8 +180,8 @@ function theme_orphan_object_theme($form) {
     );
     $rows[] = $row;
   }
-  /*
   $output = theme('table', $header, $rows);
+  /*
   $limit = 1;
   $element = 0;
   $pager_total_items[$element] = $total_records;
