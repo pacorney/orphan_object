@@ -193,11 +193,11 @@ function theme_orphan_object_theme($form) {
     $rows[] = $row;
   }
   
-  /*//set as a table theme and return the output
+  //set as a table theme and return the output
   $output = theme('table', $header, $rows);
   $output .= drupal_render($form);
   return $output;
-  */
+  
   }
 
 /**
