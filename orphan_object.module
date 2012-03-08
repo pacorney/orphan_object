@@ -50,8 +50,12 @@ function orphan_object_form() {
 
 function orphan_object_generatelist($page){
   $items_per_page = 1;
-  $item1 = array('oid' => 0, 'pid' => 'islandora:2216', 'state' => 'A', 'logmessage' => 'Message');
-  $item2 = array('oid' => 1, 'pid' => 'islandora:2224', 'state' => 'D', 'logmessage' => 'Deleted');
+  $orphans = array(
+    array('oid' => 0, 'pid' => 'islandora:2216', 'state' => 'A', 'logmessage' => 'Message'),
+    array('oid' => 1, 'pid' => 'islandora:2224', 'state' => 'D', 'logmessage' => 'Deleted'),
+  );
+  
+  return $orphans;
 }
 
 /**
