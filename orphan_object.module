@@ -48,10 +48,19 @@ function orphan_object_form() {
 
 }
 
+function orphan_object_generatelist($page){
+  $items_per_page = 1;
+  $item1 = array('oid' => 0, 'pid' => 'islandora:2216', 'state' => 'A', 'logmessage' => 'Message');
+  $item2 = array('oid' => 1, 'pid' => 'islandora:2224', 'state' => 'D', 'logmessage' => 'Deleted');
+}
+
 /**
 * Builds the orphan_object form.
 */
 function orphan_object_formpage($form_state) {
+  global $pager_page_array, $pager_total, $pager_total_items;
+  $page = isset($_GET['page']) ? $_GET['page'] : '';
+  $pager_page_array = explode(',', $page);
   
   //$resultsarray = orphan_object_getlist();
   /*
@@ -59,22 +68,14 @@ function orphan_object_formpage($form_state) {
     $fedora_item = new Fedora_Item($resultitem);
     //check to see if the fedora object exists, if exists 1 is returned.
     if ($fedora_item->exists()) {
-      printr($item = $fedora_item->Objectprofile);
+      $theitem = $fedora_item->Objectprofile;
+      $item = print_r($theitem, true);
 	}
   }
   */
-  drupal_add_css(drupal_get_path('module', 'orphan_object') .'/orphan_object.css');
   
-  $orphancount = 0;
-  // Creates an array to hold the values to be used to create the form elements
-  $orphans = array
-  (
-    array('oid' => 0, 'pid' => 'islandora:2216', 'state' => 'A', 'logmessage' => 'Message'),
-    array('oid' => 1, 'pid' => 'islandora:2224', 'state' => 'D', 'logmessage' => 'Deleted'),
-  );
-
   // Creates elements from the above values and sets up an array for the checkboxes
-  foreach ($orphans as $orphan) {
+  foreach (orphan_object_generatelist as $orphan) {
     $active[$orphan['oid']] = '';
     $form[$orphan['oid']]['pid'] = array
     (
@@ -94,8 +95,15 @@ function orphan_object_formpage($form_state) {
   $form['active'] = array(
     '#type' => 'checkboxes',
     '#options' => $active,
-    '#default_value' => variable_get('orphan_object_formpage_values', array(0, 1)),
   );
+  
+  $limit = 1;
+  $element = 0;
+  $pager_total_items[$element] = 2;
+  $pager_total[$element] = ceil($pager_total_items[$element]/$limit);
+  $pager_page_array[$element] = max(0, min((int)$pager_page_array[$element], ((int)$pager_total[$element]) -1));
+  
+  $form['pager'] = array('#value' => theme('pager', NULL, 1, 0));
 
   // Creates the Save Configuration button
   $form['submit'] = array(
@@ -151,9 +159,6 @@ function orphan_object_theme() {
 */
 
 function theme_orphan_object_theme($form) {
-  global $pager_page_array, $pager_total, $pager_total_items;
-  $page = isset($_GET['page']) ? $_GET['page'] : '';
-  $pager_page_array = explode(',', $page);
     
   $rows = array();
 
@@ -183,15 +188,6 @@ function theme_orphan_object_theme($form) {
     );
     $rows[] = $row;
   }
-  $output = theme('table', $header, $rows);
-  $limit = 1;
-  $element = 0;
-  $pager_total_items[$element] = 2;
-  $pager_total[$element] = ceil($pager_total_items[$element]/$limit);
-  $pager_page_array[$element] = max(0, min((int)$pager_page_array[$element], ((int)$pager_total[$element]) -1));
-  $output .= theme('pager', NULL, 1, 0);
-  $output .= drupal_render($form);
-  return $output;
   
   /*//set as a table theme and return the output
   $output = theme('table', $header, $rows);
