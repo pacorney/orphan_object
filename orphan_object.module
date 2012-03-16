@@ -156,7 +156,7 @@ function orphan_object_formpage_submit($form, &$form_state) {
   foreach ($passedarray as $pass){
     drupal_set_message ($pass);
   };
-  drupal_set_message ($form['1']['pid']);
+  drupal_set_message ($holder = $form['1']['pid']);
 }
 
 /**
