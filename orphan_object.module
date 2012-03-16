@@ -115,8 +115,7 @@ function orphan_object_formpage(&$form_state) {
 
   //Creates the table rows
   foreach ($manage_box as $oid) {
-    $row = array();
-    $row[] = array(drupal_render($manage_box), $orphans[$oid]['pid'], $orphans[$oid]['state'], $orphans[$oid]['logmessage']);
+    $row = array( drupal_render($manage_box), $orphans[$oid]['pid'], $orphans[$oid]['state'], $orphans[$oid]['logmessage']);
     $rows[] = $row;
   }
   //if there are rows add these headers
