@@ -85,7 +85,7 @@ function orphan_object_formpage($form_state) {
   
   $form[$i] = array
   (
-    '#value' => $oidcount,
+    '#value' => $orphans[0][0],
   );
   
   $orphan = array();
