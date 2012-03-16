@@ -113,6 +113,7 @@ function orphan_object_formpage(&$form_state) {
   // Creates the checkboxes
   $form['manage'] = array(
     '#type' => 'checkboxes',
+	
     '#options' => $manage,
   );
   
@@ -146,18 +147,21 @@ function orphan_object_formpage_submit($form, &$form_state) {
   $passedarray = array();
   $sendresults = orphan_object_getList();
   $passedcount = 0;
-  foreach ($form_state['values']['manage'] as $compare){
-	if (isset($compare)){
+  foreach ($form_state['values']['manage'] as $key => $element){
+	drupal_set_message($element);
+  }
+  /*
+  $comparearray = $form_state['values']['manage'];
+  foreach ($comparearray as $compare){
       $passedarray[$passedcount] = $sendresults[$compare];
 	  $passedcount++;
-	}
   }
   drupal_set_message ($passedcount);
   drupal_set_message (count($comparearray));
   foreach ($passedarray as $pass){
     drupal_set_message ($pass);
   };
-  
+  */
 }
 
 /**
