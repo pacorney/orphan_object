@@ -115,7 +115,7 @@ function orphan_object_formpage($form_state) {
     '#options' => $manage,
   );
   
-  pager_query("SELECT %d", $limit, 0, NULL, $limit);
+  pager_query("SELECT %d", 0, NULL, $limit);
   
   $form['pager'] = array(
     '#value' => theme('pager')
