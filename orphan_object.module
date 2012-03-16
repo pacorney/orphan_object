@@ -74,7 +74,7 @@ function orphan_object_formpage(&$form_state) {
   $pager_page_array = explode(',', $page);
   $resultsarray = orphan_object_getList();
   
-  $oidcount = 0;
+  $oidcount = 1;
   $orphans = array();
   foreach ($resultsarray as $resultitem){
     $fedora_item = new Fedora_Item($resultitem);
