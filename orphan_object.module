@@ -65,12 +65,6 @@ return $result2;
 */
 function orphan_object_formpage(&$form_state) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-  global $pager_page_array, $pager_total, $pager_total_items;
-  
-  $page = isset($_GET['page']) ? $_GET['page'] : '0';
-  $limit = 1;
-  $element = 0;
-  $pager_page_array = explode(',', $page);
   $resultsarray = orphan_object_getList();
   
   $oidcount = 1;
@@ -88,7 +82,7 @@ function orphan_object_formpage(&$form_state) {
 	$oidcount++;
   }
 
-  /* Creates elements from the above values and sets up an array for the checkboxes
+  // Creates elements from the above values and sets up an array for the checkboxes
   foreach($orphans as $orphan) {
     $manage[$orphan['oid']] = '';
     $form[$orphan['oid']]['pid'] = array
@@ -104,59 +98,23 @@ function orphan_object_formpage(&$form_state) {
       '#value' => $orphan['logmessage'],
     );
   }
-  */
+  
   // Creates the checkboxes
-  $manage_box = array(
-    '#type' => 'checkboxes',	
-    '#options' => $orphans,
+  $form['manage'] = array(
+    '#type' => 'checkboxes',
+	
+    '#options' => $manage,
   );
   
-  $rows = array();
-
-  //Creates the table rows
-  foreach ($manage_box as $oid) {
-    $row = array(drupal_render($manage_box), $orphans[$oid]['pid'], $orphans[$oid]['state'], $orphans[$oid]['logmessage']);
-    $rows[] = $row;
-  }
-  //if there are rows add these headers
-  if (count($rows)) {
-    $header = array(t('Manage Object'), t('Object PID'), t('Object State'), t('Last Log Message'));
-  }
-  //otherwise add these headers and give this message
-  else {
-    $header = array(t('Manage Object'), t('Object PID'), t('Object State'), t('Last Log Message'));
-    $row = array();
-    $row[] = array
-    (
-      'data' => t('No Orphans were found'),
-      'colspan' => 2,
-      'style' => 'text-align:center',
-    );
-    $rows[] = $row;
-  }
-  
-  $total = count($rows);
-  $pager_total_items[$element] = $total; 
-  $pager_total[$element] = ceil($pager_total_items[$element] / $limit);
-  $pager_page_array[$element] = max(0, min((int)$pager_page_array[$element], ((int)$pager_total[$element]) - 1));
-  
-  pager_query("SELECT %d", $limit, 0, NULL, $total);
-  
-  //set as a table theme and return the output
-  $output = theme('table', $header, $rows);
-  $output .= theme('pager');
-  
-  $form['content'] = array(
-    '#value' => $output,
-  );
   // Creates the Save Configuration button
   $form['toManage'] = array(
     '#type' => 'submit',
     '#value' => 'Manage Selected Object(s)',
   );
 
-  //Set form submit
+  //Set form submit and theme
   $form['#submit'][] = 'orphan_object_formpage_submit';
+  $form['#theme'] = 'orphan_object_theme';
 
   return $form;
 }
@@ -168,19 +126,19 @@ function orphan_object_formpage(&$form_state) {
 function orphan_object_formpage_submit($form, &$form_state) {
   global $user;
   $uid = $user->uid;
-  /*$passedarray = array();
+  $passedarray = array();
   $sendresults = orphan_object_getList();
   $passedcount = 0;
   foreach ($form_state['values']['manage'] as $key => $element){
 	$passedarray[$passedcount] = $sendresults[($element-1)];
 	$passedcount++;
   }
-  session_start();
-  $_SESSION['giveToManage'] = $passedarray;
+  //session_start();
+  //$_SESSION['giveToManage'] = $passedarray;
   
   foreach ($passedarray as $pass){
     drupal_set_message ($pass);
-  };*/
+  };
 }
 
 /**
@@ -202,12 +160,56 @@ function orphan_object_theme() {
 */
 
 function theme_orphan_object_theme($form) {    
+  global $pager_page_array, $pager_total, $pager_total_items;
+  
+  $page = isset($_GET['page']) ? $_GET['page'] : '0';
+  $limit = 1;
+  $element = 0;
+  $pager_page_array = explode(',', $page);
   
   
+  $rows = array();
+
+  //Creates the table rows
+  foreach (element_children($form['manage']) as $oid) {
+    $row = array();
+    $row[] = drupal_render($form['manage'][$oid]);
+    $row[] = drupal_render($form[$oid]['pid']);
+    $row[] = drupal_render($form[$oid]['state']);
+	$row[] = drupal_render($form[$oid]['logmessage']);
+    $rows[] = $row;
+  }
   
   
+  //if there are rows add these headers
+  if (count($rows)) {
+    $header = array(t('Manage Object'), t('Object PID'), t('Object State'), t('Last Log Message'));
+  }
+  //otherwise add these headers and give this message
+  else {
+    $header = array(t('Manage Object'), t('Object PID'), t('Object State'), t('Last Log Message'));
+    $row = array();
+    $row[] = array
+    (
+      'data' => t('No Orphans were found'),
+      'colspan' => 2,
+      'style' => 'text-align:center',
+    );
+    $rows[] = $row;
+  }
+  $total = count($rows);
+  $pager_total_items[$element] = $total; 
+  $pager_total[$element] = ceil($pager_total_items[$element] / $limit);
+  $pager_page_array[$element] = max(0, min((int)$pager_page_array[$element], ((int)$pager_total[$element]) - 1));
+  
+  pager_query("SELECT %d", $limit, 0, NULL, $total);
   
   
+  //set as a table theme and return the output
+  $content = theme('table', $header, $rows);
+  $output = $content . theme('pager');
+  $output .= drupal_render($form);
+  return $output;
   
   }
 
