@@ -147,7 +147,7 @@ function orphan_object_formpage_submit($form, &$form_state) {
   $sendresults = orphan_object_getList();
   $passedcount = 0;
   foreach ($form_state['values']['manage'] as $key => $element){
-	$passedarray[$passedcount] = $sendresults[($element-1)];
+	$passedarray[$passedcount] = $orphans[$element)]['pid'];
 	$passedcount++;
   }
   //session_start();
@@ -156,8 +156,6 @@ function orphan_object_formpage_submit($form, &$form_state) {
   foreach ($passedarray as $pass){
     drupal_set_message ($pass);
   };
-  $holder = $form['1']['pid'];
-  drupal_set_message ($holder);
 }
 
 /**
