@@ -118,7 +118,7 @@ function orphan_object_formpage($form_state) {
   pager_query("SELECT %d", $items_per_page, 0, NULL, $items_per_page);
   
   $form['pager'] = array(
-    '#value' => = theme('pager')
+    '#value' => theme('pager')
   );
   
   // Creates the Save Configuration button
