@@ -143,25 +143,17 @@ function orphan_object_formpage(&$form_state) {
 function orphan_object_formpage_submit($form, &$form_state) {
   global $user;
   $uid = $user->uid;
-  $comparearray = array();
   $passedarray = array();
   $sendresults = orphan_object_getList();
   $passedcount = 0;
   foreach ($form_state['values']['manage'] as $key => $element){
-	drupal_set_message($element);
-  }
-  /*
-  $comparearray = $form_state['values']['manage'];
-  foreach ($comparearray as $compare){
-      $passedarray[$passedcount] = $sendresults[$compare];
-	  $passedcount++;
+	$passedarray[$passedcount] = $sendresults[($element-1)];
+	$passedcount++;
   }
   drupal_set_message ($passedcount);
-  drupal_set_message (count($comparearray));
   foreach ($passedarray as $pass){
     drupal_set_message ($pass);
   };
-  */
 }
 
 /**
