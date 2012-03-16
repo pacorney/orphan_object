@@ -69,7 +69,7 @@ function orphan_object_formpage($form_state) {
   
   $page = isset($_GET['page']) ? $_GET['page'] : '';
   $limit = 1;
-  $offset = $page * limit;
+  $offset = $page * $limit;
   $resultsarray = orphan_object_getList();
   
   $oidcount = 0;
