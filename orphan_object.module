@@ -65,9 +65,11 @@ return $result2;
 */
 function orphan_object_formpage($form_state) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  global $pager_page_array, $pager_total, $pager_total_items;
+  
   $page = isset($_GET['page']) ? $_GET['page'] : '';
-  $items_per_page = 1;
-  $offset = $page * $items_per_page;
+  $limit = 1;
+  $offset = $page * limit;
   $resultsarray = orphan_object_getList();
   
   $oidcount = 0;
@@ -102,12 +104,10 @@ function orphan_object_formpage($form_state) {
     );
   }
   
-  $no_of_items = count($orphans);
   $element = 0;
-  
-  $GLOBALS['pager_page_array'][$element] = max(0, min((int) $pager_page_array[$element], ((int) $pager_total[$element]) - 1));
-  $GLOBALS['pager_total'][$element] = ceil($no_of_items / $items_per_page);
-
+  $pager_total_items[$element] = count($orphans);;
+  $pager_total[$element] = ceil($pager_total_items[$element] / $limit);
+  $pager_page_array[$element] = max(0, min((int)$pager_page_array[$element], ((int)$pager_total[$element]) - 1));
 
   // Creates the checkboxes
   $form['manage'] = array(
