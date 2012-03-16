@@ -69,13 +69,6 @@ function orphan_object_formpage($form_state) {
   
   $page = isset($_GET['page']) ? $_GET['page'] : '0';
   $limit = 1;
-  $form['pagevalue'] = array(
-    '#value' => $page,
-  );
-  $form['limitvalue'] = array(
-    '#value' => $limit,
-  );
-  
   $offset = $page * $limit;
   $resultsarray = orphan_object_getList();
   
@@ -122,7 +115,7 @@ function orphan_object_formpage($form_state) {
     '#options' => $manage,
   );
   
-  pager_query("SELECT %d", $items_per_page, 0, NULL, $items_per_page);
+  pager_query("SELECT %d", $limit, 0, NULL, $limit);
   
   $form['pager'] = array(
     '#value' => theme('pager')
