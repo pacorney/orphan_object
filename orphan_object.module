@@ -65,7 +65,9 @@ return $result2;
 */
 function orphan_object_formpage($form_state) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-  
+  $page = isset($_GET['page']) ? $_GET['page'] : '';
+  $items_per_page = 1;
+  $offset = $page * $items_per_page;
   $resultsarray = orphan_object_getList();
   
   $oidcount = 0;
@@ -99,6 +101,13 @@ function orphan_object_formpage($form_state) {
       '#value' => $orphan['logmessage'],
     );
   }
+  
+  $no_of_items = count($orphans);
+  $element = 0;
+  
+  $GLOBALS['pager_page_array'][$element] = max(0, min((int) $pager_page_array[$element], ((int) $pager_total[$element]) - 1));
+  $GLOBALS['pager_total'][$element] = ceil($no_of_items / $items_per_page);
+
 
   // Creates the checkboxes
   $form['manage'] = array(
@@ -106,6 +115,11 @@ function orphan_object_formpage($form_state) {
     '#options' => $manage,
   );
   
+  pager_query("SELECT %d", $items_per_page, 0, NULL, $items_per_page);
+  
+  $form['pager'] = array(
+    '#value' => = theme('pager')
+  );
   
   // Creates the Save Configuration button
   $form['submit'] = array(
@@ -149,10 +163,7 @@ function orphan_object_theme() {
 * Sets the theme.
 */
 
-function theme_orphan_object_theme($form) {
-  $page = isset($_GET['page']) ? $_GET['page'] : '';
-  $items_per_page = 1;
-  $offset = $page * $items_per_page;  
+function theme_orphan_object_theme($form) {    
   $rows = array();
 
   //Creates the table rows
@@ -165,12 +176,7 @@ function theme_orphan_object_theme($form) {
     $rows[] = $row;
   }
   
-  $no_of_items = count($rows);
-  $element = 0;
   
-  $GLOBALS['pager_page_array'][$element] = max(0, min((int) $pager_page_array[$element], ((int) $pager_total[$element]) - 1));
-  $GLOBALS['pager_total'][$element] = ceil($no_of_items / $items_per_page);
-
   //if there are rows add these headers
   if (count($rows)) {
     $header = array(t('Manage Object'), t('Object PID'), t('Object State'), t('Last Log Message'));
@@ -187,11 +193,9 @@ function theme_orphan_object_theme($form) {
     );
     $rows[] = $row;
   }
-  pager_query("SELECT %d", $items_per_page, 0, NULL, $items_per_page);
   
   //set as a table theme and return the output
   $output = theme('table', $header, $rows);
-  $output .= theme('pager');
   $output .= drupal_render($form);
   return $output;
   
