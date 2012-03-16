@@ -48,35 +48,33 @@ function orphan_object_form() {
 
 }
 
-function orphan_object_generatelist($page){
-  $items_per_page = 1;
-  $orphans = array(
-    array('oid' => 0, 'pid' => 'islandora:2216', 'state' => 'A', 'logmessage' => 'Message'),
-    array('oid' => 1, 'pid' => 'islandora:2224', 'state' => 'D', 'logmessage' => 'Deleted'),
-  );
-  
-  return $orphans;
+function orphan_object_getState($incpid){
+$pid = $incpid;
+$urltest = variable_get('fedora_base_url', 'http://localhost:8080/fedora');
+$urltest .= "/objects?terms=$pid&state=true&resultFormat=xml";
+$resultxml2 = do_curl($urltest);
+$resultelements2 = simplexml_load_string($resultxml2);
+  if (!empty($resultelements2)) {
+    $result2 = (string) $resultelements2->resultList->objectFields->state;
+  }
+return $result2;
 }
 
 /**
 * Builds the orphan_object form.
 */
 function orphan_object_formpage($form_state) {
-  global $pager_page_array, $pager_total, $pager_total_items;
-  $page = isset($_GET['page']) ? $_GET['page'] : '';
-  $pager_page_array = explode(',', $page);
   
-  //$resultsarray = orphan_object_getlist();
-  /*
-  foreach ($resultsarray as $resultitem) {
-    $fedora_item = new Fedora_Item($resultitem);
-    //check to see if the fedora object exists, if exists 1 is returned.
-    if ($fedora_item->exists()) {
-      $theitem = $fedora_item->Objectprofile;
-      $item = print_r($theitem, true);
+  
+  $resultsarray = orphan_object_getList();
+  
+  $oidcount = 0;
+  
+  $orphans = array(
+    foreach ($resultsarray as $resultitem){
+	  array('oid' => $oidcount, 'pid' => $resultitem, 'state' => orphan_object_getState($resultitem), 'logmessage' => get_datastream_history($resultitem)),
 	}
-  }
-  */
+  );
   
   // Creates elements from the above values and sets up an array for the checkboxes
   foreach (orphan_object_generatelist($page) as $orphan) {
@@ -96,35 +94,17 @@ function orphan_object_formpage($form_state) {
   }
 
   // Creates the checkboxes
-  $form['active'] = array(
+  $form['manage'] = array(
     '#type' => 'checkboxes',
     '#options' => $active,
   );
   
-  $limit = 1;
-  $element = 0;
-  $pager_total_items[$element] = 2;
-  $pager_total[$element] = ceil($pager_total_items[$element]/$limit);
-  $pager_page_array[$element] = max(0, min((int)$pager_page_array[$element], ((int)$pager_total[$element]) -1));
   
-  $form['pager'] = array('#value' => theme('pager', NULL, 1, 0));
-
   // Creates the Save Configuration button
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => 'Manage Selected Object(s)',
   );
-  
-  $resultsarray = orphan_object_getlist();
-  
-  foreach ($resultsarray as $result) {
-    $form[$result] = array
-    (
-      '#value' => $result,
-    );
-  }
-  
-  
 
   //Set form submit and theme
   $form['#submit'][] = 'orphan_object_formpage_submit';
@@ -163,18 +143,25 @@ function orphan_object_theme() {
 */
 
 function theme_orphan_object_theme($form) {
-    
+  $page = isset($_GET['page']) ? $_GET['page'] : '';
+  $items_per_page = 1;  
   $rows = array();
 
   //Creates the table rows
-  foreach (element_children($form['active']) as $oid) {
+  foreach (element_children($form['manage']) as $oid) {
     $row = array();
-    $row[] = drupal_render($form['active'][$oid]);
+    $row[] = drupal_render($form['manage'][$oid]);
     $row[] = drupal_render($form[$oid]['pid']);
     $row[] = drupal_render($form[$oid]['state']);
 	$row[] = drupal_render($form[$oid]['logmessage']);
     $rows[] = $row;
   }
+  
+  $no_of_elements = count($rows);
+  $element = 0;
+  
+  $GLOBALS['pager_page_array'][$element] = max(0, min((int) $pager_page_array[$element], ((int) $pager_total[$element]) - 1));
+  $GLOBALS['pager_total'][$element] = ceil($no_of_items / $items_per_page);
 
   //if there are rows add these headers
   if (count($rows)) {
@@ -192,9 +179,11 @@ function theme_orphan_object_theme($form) {
     );
     $rows[] = $row;
   }
+  pager_query("SELECT %d", $items_per_page, 0, NULL, $total);
   
   //set as a table theme and return the output
   $output = theme('table', $header, $rows);
+  $output .= theme('pager');
   $output .= drupal_render($form);
   return $output;
   
@@ -310,14 +299,14 @@ function orphan_object_inactivate_fedora_objects($objects, $uid) {
 }
 
 /**
- * Function: orphan_objects_getlist
+ * Function: orphan_objects_getList
  *
  * Description: Returns an array containing all the orphan objects in the fedora repository
  *
  * @return array
  */
  
-function orphan_object_getlist() {
+function orphan_object_getList() {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
   
@@ -344,28 +333,21 @@ function orphan_object_getlist() {
   $pidarray = array();
   $existingnodes = array();
   $nonexistingnodes = array();
-  $pidarray = array();
-  $nidcount = 0;
-  $pidcount = 0;
-  $existcount = 0;
-  $nonexistcount = 0;
+  $npidarray = array();
   
   $results = db_query("SELECT nid FROM {node_fedora_objects}");
   
   while ($row = db_fetch_object($results)){
     $nidarray[$nidcount] = $row->nid;	
-	$nidcount++;
   }
   
   foreach ($nidarray as $checknid){
 	$test_node = node_load($checknid);
 	if ($test_node != false){
 	  $existingnodes[$existingcount] = $checknid;
-	  $existcount++;
 	}
 	else if ($test_node == false){
 	  $nonexistingnodes[$nonexistcount] = $checknid;
-	  $nonexistcount++;
 	}
   }
   
@@ -376,12 +358,22 @@ function orphan_object_getlist() {
 
     while ($row = db_fetch_object($pidresults)){
       $pidarray[$databasecount] = $row->pid;
-	  $pidcount++;
+    }
+  }
+  
+  if(!empty($nonexistingnodes)){
+  
+    $placeholders = db_placeholders($nonexistingnodes);
+    $pidresults = db_query("SELECT f.pid FROM {node_fedora_objects} f WHERE f.nid IN ($placeholders)", $existingnodes);
+
+    while ($row = db_fetch_object($npidresults)){
+      $npidarray[$databasecount] = $row->pid;
     }
   }
 
   $returnlist = array_diff($collectionarray, $pidarray);
-  $nonexistlist = array_intersect($collectionarray, $nonexistingnodes);
+  $reversereturnlist = array_intersect($pidarray, $collectionarray);
+  $nonexistlist = array_intersect($reversereturnlist, $npidarray);
   $returnlist = array_merge($returnlist, $nonexistlist);
   
   return $returnlist;
