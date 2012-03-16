@@ -146,8 +146,7 @@ function orphan_object_formpage_submit($form, &$form_state) {
   $passedarray = array();
   $sendresults = orphan_object_getList();
   $passedcount = 0;
-  $comparearray = $form_state['values']['manage'];
-  foreach ($comparearray as $compare){
+  foreach ($form_state['values']['manage'] as $compare){
 	if (isset($compare)){
       $passedarray[$passedcount] = $sendresults[$compare];
 	  $passedcount++;
