@@ -84,10 +84,10 @@ function orphan_object_formpage($form_state) {
 	$oidcount++;
   }
   
-  
   // Creates elements from the above values and sets up an array for the checkboxes
-  foreach ($orphans as $orphan) {
-    $active[$orphan['oid']] = '';
+  for($i=0; $i<$oidcount;$i++) {
+    $orphan = $orphans[$i];
+    $manage[$orphan['oid']] = '';
     $form[$orphan['oid']]['pid'] = array
     (
       '#value' => $orphan['pid'],
@@ -105,7 +105,7 @@ function orphan_object_formpage($form_state) {
   // Creates the checkboxes
   $form['manage'] = array(
     '#type' => 'checkboxes',
-    '#options' => $active,
+    '#options' => $manage,
   );
   
   
@@ -153,7 +153,7 @@ function orphan_object_theme() {
 
 function theme_orphan_object_theme($form) {
   $page = isset($_GET['page']) ? $_GET['page'] : '';
-  $items_per_page = 2;  
+  $items_per_page = 1;  
   $rows = array();
 
   //Creates the table rows
