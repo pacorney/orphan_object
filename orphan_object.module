@@ -86,7 +86,7 @@ function orphan_object_formpage($form_state) {
   
   
   // Creates elements from the above values and sets up an array for the checkboxes
-  foreach (orphan_object_generatelist($page) as $orphan) {
+  foreach ($orphans as $orphan) {
     $active[$orphan['oid']] = '';
     $form[$orphan['oid']]['pid'] = array
     (
