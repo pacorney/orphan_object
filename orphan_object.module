@@ -145,7 +145,7 @@ function orphan_object_formpage_submit($form, &$form_state) {
   $comparearray = array();
   $comparearray = $form_state['values']['manage'];
   foreach ($comparearray as $compare){
-	$form[$compare = array(
+	$form[$compare] = array(
     print_r($compare, 1),
 	);
   }
