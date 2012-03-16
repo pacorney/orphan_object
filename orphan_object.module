@@ -151,11 +151,9 @@ function orphan_object_formpage_submit($form, &$form_state) {
     $passedarray[$passedcount] = $sendresults[$compare];
 	$passedcount++;
   }
-  drupal_set_message(
   foreach ($passedarray as $pass){
-  echo "$pass";
-  }
-  );
+    drupal_set_message ($pass);
+  };
   
 }
 
