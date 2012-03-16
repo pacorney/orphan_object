@@ -83,10 +83,10 @@ function orphan_object_formpage($form_state) {
 	$oidcount++;
   }
   
-  $form[$i] = array
+  $form['test'] = array
   (
-    '#value' => $orphans[0][0],
-  );
+    '#value' => $orphans[2]['pid'],
+  )
 
   // Creates elements from the above values and sets up an array for the checkboxes
   foreach($orphans as $orphan) {
@@ -191,7 +191,7 @@ function theme_orphan_object_theme($form) {
     );
     $rows[] = $row;
   }
-  pager_query("SELECT %d", $items_per_page, 0, NULL, $total);
+  pager_query("SELECT %d", $items_per_page, 0, NULL, $items_per_page);
   
   //set as a table theme and return the output
   $output = theme('table', $header, $rows);
