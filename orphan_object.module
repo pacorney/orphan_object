@@ -63,7 +63,7 @@ return $result2;
 /**
 * Builds the orphan_object form.
 */
-function orphan_object_formpage($form_state) {
+function orphan_object_formpage(&$form_state) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   global $pager_page_array, $pager_total, $pager_total_items;
   
@@ -142,6 +142,11 @@ function orphan_object_formpage($form_state) {
 function orphan_object_formpage_submit($form, &$form_state) {
   global $user;
   $uid = $user->uid;
+  $comparearray = array();
+  $comparearray = $form_state['values']['manage'];
+  foreach ($comparearray as $compare){
+    print_r($compare, 1);
+  }
   drupal_set_message(t('The update has been performed.'));
   
 }
