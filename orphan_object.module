@@ -145,7 +145,9 @@ function orphan_object_formpage_submit($form, &$form_state) {
   $comparearray = array();
   $comparearray = $form_state['values']['manage'];
   foreach ($comparearray as $compare){
-    print_r($compare, 1);
+	$form[$compare = array(
+    print_r($compare, 1),
+	);
   }
   drupal_set_message(t('The update has been performed.'));
   
