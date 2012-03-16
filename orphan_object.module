@@ -69,7 +69,9 @@ function orphan_object_formpage($form_state) {
   
   $page = isset($_GET['page']) ? $_GET['page'] : '0';
   $limit = 1;
-  $offset = $page * $limit;
+  $total = count($orphans);
+  $element = 0;
+  $pager_page_array = explode(',', $page);
   $resultsarray = orphan_object_getList();
   
   $oidcount = 0;
@@ -104,8 +106,7 @@ function orphan_object_formpage($form_state) {
     );
   }
   
-  $element = 0;
-  $pager_total_items[$element] = count($orphans);;
+  $pager_total_items[$element] = $total; 
   $pager_total[$element] = ceil($pager_total_items[$element] / $limit);
   $pager_page_array[$element] = max(0, min((int)$pager_page_array[$element], ((int)$pager_total[$element]) - 1));
 
@@ -115,7 +116,7 @@ function orphan_object_formpage($form_state) {
     '#options' => $manage,
   );
   
-  pager_query("SELECT %d", 0, NULL, $limit);
+  pager_query("SELECT %d", $limit, 0, NULL, $total);
   
   $form['pager'] = array(
     '#value' => theme('pager')
