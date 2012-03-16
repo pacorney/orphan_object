@@ -70,10 +70,10 @@ function orphan_object_formpage($form_state) {
   $page = isset($_GET['page']) ? $_GET['page'] : '';
   $limit = 1;
   $form['pagevalue'] = array(
-    '#value' = $page,
+    '#value' => $page,
   );
   $form['limitvalue'] = array(
-    '#value' = $limit,
+    '#value' => $limit,
   );
   
   $offset = $page * $limit;
