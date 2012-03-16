@@ -124,7 +124,7 @@ function orphan_object_formpage(&$form_state) {
   );
   
   // Creates the Save Configuration button
-  $form['submit'] = array(
+  $form['toManage'] = array(
     '#type' => 'submit',
     '#value' => 'Manage Selected Object(s)',
   );
@@ -150,10 +150,13 @@ function orphan_object_formpage_submit($form, &$form_state) {
 	$passedarray[$passedcount] = $sendresults[($element-1)];
 	$passedcount++;
   }
-  drupal_set_message ($passedcount);
+  //session_start();
+  //$_SESSION['giveToManage'] = $passedarray;
+  
   foreach ($passedarray as $pass){
     drupal_set_message ($pass);
   };
+  drupal_set_message ($form_state['values']['0']['pid];
 }
 
 /**
