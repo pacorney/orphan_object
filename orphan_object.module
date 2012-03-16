@@ -79,7 +79,7 @@ function orphan_object_formpage($form_state) {
     else {
       $history = '';
     }
-	$orphans[oidcount] = array('oid' => $oidcount, 'pid' => $resultitem, 'state' => orphan_object_getState($resultitem), 'logmessage' => $history);
+	$orphans[$oidcount] = array('oid' => $oidcount, 'pid' => $resultitem, 'state' => orphan_object_getState($resultitem), 'logmessage' => $history);
 	$oidcount++;
   }
   
