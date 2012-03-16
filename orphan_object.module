@@ -153,7 +153,7 @@ function orphan_object_theme() {
 
 function theme_orphan_object_theme($form) {
   $page = isset($_GET['page']) ? $_GET['page'] : '';
-  $items_per_page = 1;  
+  $items_per_page = 2;  
   $rows = array();
 
   //Creates the table rows
