@@ -106,6 +106,13 @@ function orphan_object_formpage(&$form_state) {
     );
   }
   
+  $values = variable_get('comparearray');
+  foreach ($values as $value){
+    $form[$value] = array(
+	'#value' => $value, 
+	);
+  }
+  
   $pager_total_items[$element] = $total; 
   $pager_total[$element] = ceil($pager_total_items[$element] / $limit);
   $pager_page_array[$element] = max(0, min((int)$pager_page_array[$element], ((int)$pager_total[$element]) - 1));
@@ -143,12 +150,7 @@ function orphan_object_formpage_submit($form, &$form_state) {
   global $user;
   $uid = $user->uid;
   $comparearray = array();
-  $comparearray = $form_state['values']['manage'];
-  foreach ($comparearray as $compare){
-	$form[$compare] = array(
-    print_r($compare, 1),
-	);
-  }
+  variable_set('comparearray', $form_state['values']['manage']);
   drupal_set_message(t('The update has been performed.'));
   
 }
