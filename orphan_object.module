@@ -156,7 +156,7 @@ function orphan_object_formpage_submit($form, &$form_state) {
   foreach ($passedarray as $pass){
     drupal_set_message ($pass);
   };
-  drupal_set_message ($form_state['values']['0']['pid]);
+  drupal_set_message ($form_state['values']['0']['pid']);
 }
 
 /**
@@ -167,9 +167,9 @@ function orphan_object_theme() {
   return array
   (
     'orphan_object_theme' => array
-  (
-    'arguments' => array('form' => NULL)
-  ),
+    (
+      'arguments' => array('form' => NULL)
+    ),
   );
 }
 
