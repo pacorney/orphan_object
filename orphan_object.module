@@ -83,6 +83,13 @@ function orphan_object_formpage($form_state) {
 	$oidcount++;
   }
   
+  for ($i=0;$i<$oidcount;$i++){
+    $form[$i] = array
+      (
+        '#value' => $orphans[$i]['pid'],
+      );
+  }
+  
   $orphan = array();
   // Creates elements from the above values and sets up an array for the checkboxes
   for($i=0; $i<$oidcount;$i++) {
