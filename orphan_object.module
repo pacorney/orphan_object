@@ -72,7 +72,7 @@ function orphan_object_formpage($form_state) {
   
   $orphans = array();
   foreach ($resultsarray as $resultitem){
-	$temparray = array('oid' => $oidcount, 'pid' => $resultitem, 'state' => orphan_object_getState($resultitem), 'logmessage' => get_datastream_history($resultitem)),
+	$temparray = array('oid' => $oidcount, 'pid' => $resultitem, 'state' => orphan_object_getState($resultitem), 'logmessage' => get_datastream_history($resultitem));
 	$orphans[oidcount] = $temparray;
 	$oidcount++;
   }
