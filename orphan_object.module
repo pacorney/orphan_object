@@ -64,7 +64,7 @@ return $result2;
 * Builds the orphan_object form.
 */
 function orphan_object_formpage($form_state) {
-  
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   
   $resultsarray = orphan_object_getList();
   
