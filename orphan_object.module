@@ -134,21 +134,20 @@ function orphan_object_formpage(&$form_state) {
 	  $passedcount++;
     }
 	
-	$oidcount = 1;
-    $orphans = array();
+	$sentoidcount = 1;
+    $sentorphans = array();
     foreach ($passedarray as $passeditem){
       $fedora_item = new Fedora_Item($passeditem);
       //check to see if the fedora object exists, if exists 1 is returned.
       if ($fedora_item->exists()) {
-      $history = $fedora_item->get_datastream_history($resultitem);
+      $history = $fedora_item->get_datastream_history($passeditem);
       }
       else {
         $history = '';
       }
-	  $sentorphans[$oidcount] = array('oid' => $oidcount, 'pid' => $resultitem, 'status' => orphan_object_getState($resultitem), 'log' => $history);
-	  $oidcount++;
+	  $sentorphans[$sentoidcount] = array('oid' => $sentoidcount, 'pid' => $passeditem, 'status' => orphan_object_getState($passeditem), 'log' => $history);
+	  $sentoidcount++;
     }
-	drupal_set_message ($orphans[1]['pid']);
 	
     $radioOptions = array(
       '#type' => 'radios',
@@ -160,13 +159,13 @@ function orphan_object_formpage(&$form_state) {
     // Creates elements from the above values and sets up an array for the checkboxes
     foreach ($sentorphans as $orphan) {
       // Object Cell
-      $form['orphans'][$orphan['oid']]['pid'] = array( '#value' => $orphan['pid']);
+      $form['orphans'][$orphan['oid']]['pid'] = array( '#value' => $orphan['pid'],);
 	  // Radios Cell
       $form['orphans'][$orphan['oid']]['#tree'] = TRUE;
       $form['orphans'][$orphan['oid']]['status'] = $radioOptions;
       $form['orphans'][$orphan['oid']]['status']['#default_value'] = $orphan['status'];
       // Log Message
-      $form['orphans'][$orphan['oid']]['log'] = array('#type' => 'textfield', '#default_value' => $orphan['log']);
+      $form['orphans'][$orphan['oid']]['log'] = array('#type' => 'textfield', '#default_value' => $orphan['log'],);
     }
 
     // Creates the Save Configuration button
@@ -281,16 +280,6 @@ function orphan_object_theme() {
     ),
   );
 }
-/*
-function orphan_object_form_update() {
-  return array
-  (
-    'orphan_object_form_update' => array
-    (
-      'arguments' => array('form' => NULL)
-    ),
-  );
-}*/
 
 /**
 * Sets the theme.
