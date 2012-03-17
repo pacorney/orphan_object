@@ -137,18 +137,18 @@ function orphan_object_formpage(&$form_state) {
 	$sentoidcount = 1;
     $sentorphans = array();
     foreach ($passedarray as $passeditem){
-	  drupal_set_message($passeditem);
-	  
-      $fedora_item = new Fedora_Item($passeditem);
-      //check to see if the fedora object exists, if exists 1 is returned.
-      if ($fedora_item->exists()) {
-      $history = $fedora_item->get_datastream_history($passeditem);
-      }
-      else {
-        $history = '';
-      }
-	  $sentorphans[$sentoidcount] = array('oid' => $sentoidcount, 'pid' => $passeditem, 'status' => orphan_object_getState($passeditem), 'log' => $history);
-	  $sentoidcount++;
+	  if(isset($passeditem)){
+        $fedora_item = new Fedora_Item($passeditem);
+        //check to see if the fedora object exists, if exists 1 is returned.
+        if ($fedora_item->exists()) {
+        $history = $fedora_item->get_datastream_history($passeditem);
+        }
+        else {
+          $history = '';
+        }
+	    $sentorphans[$sentoidcount] = array('oid' => $sentoidcount, 'pid' => $passeditem, 'status' => orphan_object_getState($passeditem), 'log' => $history);
+	    $sentoidcount++;
+	  }
     }
     $radioOptions = array(
       '#type' => 'radios',
