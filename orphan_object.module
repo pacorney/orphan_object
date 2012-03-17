@@ -277,13 +277,7 @@ function orphan_object_theme() {
     (
       'arguments' => array('form' => NULL)
     ),
-  );
-}
-
-function orphan_object_form_update() {
-  return array
-  (
-    'orphan_object_form_update' => array
+	'orphan_object_form_update' => array
     (
       'arguments' => array('form' => NULL)
     ),
