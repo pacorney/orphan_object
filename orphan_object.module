@@ -133,10 +133,6 @@ function orphan_object_formpage(&$form_state) {
 	  $passedarray[$passedcount] = $sendresults[($element-1)];
 	  $passedcount++;
     }
-
-    foreach ($passedarray as $pass){
-      drupal_set_message ($pass);
-	};
 	
 	$oidcount = 1;
     $orphans = array();
@@ -149,9 +145,11 @@ function orphan_object_formpage(&$form_state) {
       else {
         $history = '';
       }
-	  $orphans[$oidcount] = array('oid' => $oidcount, 'pid' => $resultitem, 'status' => orphan_object_getState($resultitem), 'log' => $history);
+	  $sentorphans[$oidcount] = array('oid' => $oidcount, 'pid' => $resultitem, 'status' => orphan_object_getState($resultitem), 'log' => $history);
 	  $oidcount++;
     }
+	drupal_set_message ($orphans[1]['pid']);
+	
     $radioOptions = array(
       '#type' => 'radios',
       '#options' => array('A' => 'Activate', 'I' => 'Inactivate', 'D' => 'Delete', 'P' => 'Purge', ),
@@ -160,7 +158,7 @@ function orphan_object_formpage(&$form_state) {
     );
 
     // Creates elements from the above values and sets up an array for the checkboxes
-    foreach ($orphans as $orphan) {
+    foreach ($sentorphans as $orphan) {
       // Object Cell
       $form['orphans'][$orphan['oid']]['pid'] = array( '#value' => $orphan['pid']);
 	  // Radios Cell
@@ -277,9 +275,13 @@ function orphan_object_theme() {
     (
       'arguments' => array('form' => NULL)
     ),
+	'orphan_object_form_update' => array
+    (
+      'arguments' => array('form' => NULL)
+    ),
   );
 }
-
+/*
 function orphan_object_form_update() {
   return array
   (
@@ -288,7 +290,7 @@ function orphan_object_form_update() {
       'arguments' => array('form' => NULL)
     ),
   );
-}
+}*/
 
 /**
 * Sets the theme.
