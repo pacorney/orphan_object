@@ -148,7 +148,7 @@ function orphan_object_formpage(&$form_state) {
 	  $sentorphans[$sentoidcount] = array('oid' => $sentoidcount, 'pid' => $passeditem, 'status' => orphan_object_getState($passeditem), 'log' => $history);
 	  $sentoidcount++;
     }
-	
+	drupal_set_message($sentoidcount);
     $radioOptions = array(
       '#type' => 'radios',
       '#options' => array('A' => 'Activate', 'I' => 'Inactivate', 'D' => 'Delete', 'P' => 'Purge', ),
