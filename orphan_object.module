@@ -128,7 +128,7 @@ function orphan_object_formpage(&$form_state) {
     $sentorphans = array();
     foreach ($form_state['storage']['passed'] as $passeditem) {
       if (isset($passeditem)) {
-        $sentorphans[$sentoidcount] = $passed;
+        $sentorphans[$sentoidcount] = $passeditem;
         $sentoidcount++;
       }
     }
