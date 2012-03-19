@@ -81,9 +81,11 @@ function orphan_object_formpage(&$form_state) {
       else {
         $history = '';
       }
-    $orphans[$oidcount] = array('oid' => $oidcount, 'pid' => $resultitem, 'state' => orphan_object_getState($resultitem), 'logmessage' => $history);
-    $oidcount++;
-  }
+      $orphans[$oidcount] = array('oid' => $oidcount, 'pid' => $resultitem, 'state' => orphan_object_getState($resultitem), 'logmessage' => $history);
+      $oidcount++;
+    }
+	
+	$form_state['storage']['orphans'] = $orphans;
 
     // Creates elements from the above values and sets up an array for the checkboxes
     foreach ($orphans as $orphan) {
@@ -121,19 +123,12 @@ function orphan_object_formpage(&$form_state) {
     return $form;
   }
   elseif ($form_state['storage']['step'] == 2) {
-    $passedarray = array();
-    $sendresults = orphan_object_getList();
-    $passedcount = 0;
-    foreach ($form_state['storage']['values']['1']['manage'] as $key => $element) {
-      $passedarray[$passedcount] = $sendresults[($element-1)];
-      $passedcount++;
-    }
 
     $sentoidcount = 1;
     $sentorphans = array();
-    foreach ($passedarray as $passeditem) {
+    foreach ($form_state['storage']['passed'] as $passeditem) {
       if (isset($passeditem)) {
-        $sentorphans[$sentoidcount] = array('oid' => $sentoidcount, 'pid' => $passeditem, 'status' => orphan_object_getState($passeditem), 'log' => '');
+        $sentorphans[$sentoidcount] = $passed);
         $sentoidcount++;
       }
     }
@@ -152,10 +147,10 @@ function orphan_object_formpage(&$form_state) {
       // Radios Cell
       $form['orphans'][$orphan['oid']]['#tree'] = TRUE;
       $form['orphans'][$orphan['oid']]['status'] = $radioOptions;
-      $form['orphans'][$orphan['oid']]['status']['#default_value'] = $orphan['status'];
-      $form['orphans'][$orphan['oid']]['orgStatus'] = array('#type' => 'hidden', '#value' => $orphan['status']);
+      $form['orphans'][$orphan['oid']]['status']['#default_value'] = $orphan['state'];
+      $form['orphans'][$orphan['oid']]['orgStatus'] = array('#type' => 'hidden', '#value' => $orphan['state']);
       // Log Message
-      $form['orphans'][$orphan['oid']]['log'] = array('#type' => 'textfield', '#default_value' => $orphan['log']);
+      $form['orphans'][$orphan['oid']]['log'] = array('#type' => 'textfield', '#default_value' => $orphan['logmessage']);
     }
 
     // Creates the Save Configuration button
@@ -185,13 +180,10 @@ function orphan_object_formpage_submit($form, &$form_state) {
     $passedcount = 0;
     foreach ($form_state['values']['manage'] as $key => $element) {
 	  if (isset($element))
-      $passedarray[$passedcount] = $orphans[$passedcount];
+      $passedarray[$passedcount] = $form_state['storage']['orphans'][$element];
       $passedcount++;
     }
-	$form_state['storage']['passed'][$form_state['storage']['step']] = $passedarray;
-	print_r($passedarray);
-	die();
-   
+	$form_state['storage']['passed'] = $passedarray;
   }
   if ($form_state['clicked_button']['#id'] == 'edit-submit') {
     $form_state['storage']['step']--;
