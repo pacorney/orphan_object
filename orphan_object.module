@@ -77,32 +77,40 @@ function orphan_object_formpage(&$form_state) {
         preg_match('/<audit:justification>(.)*<\/audit:justification>\n<\/audit:record>\n<\/audit:auditTrail>/', $xml, $matches);
         $history = $matches[0];
         $history = str_replace(array('<audit:justification>', '</audit:justification>', '\n', '</audit:record>', '</audit:auditTrail>'), '', $history);
+		$title = $fedora_item->get_datastream('OBJ');
+		$title->label;
       }
       else {
         $history = '';
       }
-      $orphans[$oidcount] = array('oid' => $oidcount, 'pid' => $resultitem, 'state' => orphan_object_getState($resultitem), 'logmessage' => $history);
+	  $url = variable_get('fedora_repository_url');
+	  $url .= $resultitem;
+	  $owner = get_file_owner_name($resultitem);
+      $orphans[$oidcount] = array('oid' => $oidcount, 'pid' => $resultitem, 'title' => '<a href = "$url">$title</a>', 'owner' => $owner, 'state' => orphan_object_getState($resultitem), 'logmessage' => $history);
       $oidcount++;
     }
-	
-	$form_state['storage']['orphans'] = $orphans;
+    $form_state['storage']['orphans'] = $orphans;
 
-    // Creates elements from the above values and sets up an array for the checkboxes
-    foreach ($orphans as $orphan) {
-      $manage[$orphan['oid']] = '';
-      $form[$orphan['oid']]['pid'] = array
+  // Creates elements from the above values and sets up an array for the checkboxes
+  foreach ($orphans as $orphan) {
+    $manage[$orphan['oid']] = '';
+    $form[$orphan['oid']]['pid'] = array
       (
-        '#value' => $orphan['pid'],
+        '#value' => $orphan['title'],
       );
-      $form[$orphan['oid']]['state'] = array
+	$form[$orphan['oid']]['owner'] = array
+      (
+        '#value' => $orphan['owner'],
+      );
+    $form[$orphan['oid']]['state'] = array
       (
         '#value' => $orphan['state'],
       );
-      $form[$orphan['oid']]['logmessage'] = array
+    $form[$orphan['oid']]['logmessage'] = array
       (
         '#value' => $orphan['logmessage'],
       );
-    }
+  }
 
     // Creates the checkboxes
     $form['manage'] = array(
@@ -127,10 +135,8 @@ function orphan_object_formpage(&$form_state) {
     $sentoidcount = 1;
     $sentorphans = array();
     foreach ($form_state['storage']['passed'] as $passeditem) {
-      if (isset($passeditem)) {
-        $sentorphans[$sentoidcount] = $passeditem;
-        $sentoidcount++;
-      }
+      $sentorphans[$sentoidcount] = $passeditem;
+      $sentoidcount++;
     }
     $radioOptions = array(
       '#type' => 'radios',
@@ -150,7 +156,7 @@ function orphan_object_formpage(&$form_state) {
       $form['orphans'][$orphan['oid']]['status']['#default_value'] = $orphan['state'];
       $form['orphans'][$orphan['oid']]['orgStatus'] = array('#type' => 'hidden', '#value' => $orphan['state']);
       // Log Message
-      $form['orphans'][$orphan['oid']]['log'] = array('#type' => 'textfield', '#default_value' => $orphan['logmessage']);
+      $form['orphans'][$orphan['oid']]['log'] = array('#type' => 'textfield');
     }
 
     // Creates the Save Configuration button
@@ -173,17 +179,18 @@ function orphan_object_formpage(&$form_state) {
 function orphan_object_formpage_submit($form, &$form_state) {
 
   global $user;
-  
+
   if ($form_state['clicked_button']['#id'] == 'edit-toManage') {
     $form_state['storage']['step']++;
-	$passedarray = array();
+    $passedarray = array();
     $passedcount = 0;
     foreach ($form_state['values']['manage'] as $key => $element) {
-	  if (isset($element))
-      $passedarray[$passedcount] = $form_state['storage']['orphans'][$element];
-      $passedcount++;
+      if (isset($element)) {
+        $passedarray[$passedcount] = $form_state['storage']['orphans'][$element];
+        $passedcount++;
+      }
     }
-	$form_state['storage']['passed'] = $passedarray;
+    $form_state['storage']['passed'] = $passedarray;
   }
   if ($form_state['clicked_button']['#id'] == 'edit-submit') {
     $form_state['storage']['step']--;
@@ -542,7 +549,7 @@ function orphan_object_getList() {
 
   $collectionquery = 'select $object $title from <#ri>
                             where ($object <dc:title> $title
-                              and $object <fedora-rels-ext:isMemberOfCollection><info:fedora/islandora:2297>)';
+                              and $object <fedora-rels-ext:isMemberOfCollection><info:fedora/islandora:Generic_Collection>)';
   $collectionurl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
   $collectionurl .= "?type=tuples&flush=TRUE&format=csv&limit=1000&lang=itql&stream=on&query=";
   $collectioncontent = do_curl($collectionurl . htmlentities(urlencode($collectionquery)));
@@ -561,15 +568,15 @@ function orphan_object_getList() {
   }
 
   $results = array();
-  
+
   $query = db_query("SELECT pid FROM {node_fedora_objects}");
-  
-  
-  while ($resultrow = db_fetch_object($query)){
+
+
+  while ($resultrow = db_fetch_object($query)) {
     $results[] = $resultrow->pid;
   }
-  
+
   $returnlist = array_diff($collectionarray, $results);
-  
+
   return $returnlist;
 }
