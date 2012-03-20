@@ -60,7 +60,8 @@ function orphan_object_getState($incpid) {
  */
 function orphan_object_formpage(&$form_state) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-
+  global $base_url;
+  
   if (!isset($form_state['storage']['step'])) {
     $form_state['storage']['step'] = 1;
   }
@@ -77,16 +78,15 @@ function orphan_object_formpage(&$form_state) {
         preg_match('/<audit:justification>(.)*<\/audit:justification>\n<\/audit:record>\n<\/audit:auditTrail>/', $xml, $matches);
         $history = $matches[0];
         $history = str_replace(array('<audit:justification>', '</audit:justification>', '\n', '</audit:record>', '</audit:auditTrail>'), '', $history);
-		$title = $fedora_item->get_datastream('OBJ');
-		$title->label;
+		$obj = $fedora_item->get_datastream('OBJ');
+		$title = $obj->label;
       }
       else {
         $history = '';
       }
-	  $url = variable_get('fedora_repository_url');
-	  $url .= $resultitem;
+	  $url = $base_url . "/fedora/repository/$resultitem";
 	  $owner = get_file_owner_name($resultitem);
-      $orphans[$oidcount] = array('oid' => $oidcount, 'pid' => $resultitem, 'title' => '<a href = "$url">$title</a>', 'owner' => $owner, 'state' => orphan_object_getState($resultitem), 'logmessage' => $history);
+      $orphans[$oidcount] = array('oid' => $oidcount, 'pid' => $resultitem, 'title' => '<a href = "' . $url . '">' . $title . '</a>', 'owner' => $owner, 'state' => orphan_object_getState($resultitem), 'logmessage' => $history);
       $oidcount++;
     }
     $form_state['storage']['orphans'] = $orphans;
@@ -289,6 +289,7 @@ function theme_orphan_object_theme($form) {
     $row = array();
     $row[] = drupal_render($form['manage'][$oid]);
     $row[] = drupal_render($form[$oid]['pid']);
+	$row[] = drupal_render($form[$oid]['owner']);
     $row[] = drupal_render($form[$oid]['state']);
     $row[] = drupal_render($form[$oid]['logmessage']);
     $rows[] = $row;
@@ -296,16 +297,16 @@ function theme_orphan_object_theme($form) {
 
   //if there are rows add these headers
   if (count($rows)) {
-    $header = array(t('Manage Object'), t('Object PID'), t('Object State'), t('Last Log Message'));
+    $header = array(t('Manage Object'), t('Object'), t('Object Owner'), t('Object State'), t('Last Log Message'));
   }
   //otherwise add these headers and give this message
   else {
-    $header = array(t('Manage Object'), t('Object PID'), t('Object State'), t('Last Log Message'));
+    $header = array(t('Manage Object'), t('Object'), t('Object Owner'), t('Object State'), t('Last Log Message'));
     $row = array();
     $row[] = array
     (
       'data' => t('No Orphans were found'),
-      'colspan' => 2,
+      'colspan' => 5,
       'style' => 'text-align:center',
     );
     $rows[] = $row;
