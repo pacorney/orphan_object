@@ -84,6 +84,9 @@ function orphan_object_formpage(&$form_state) {
       else {
         $history = '';
       }
+	  if ($title = ""  || !isset($title)){
+	    $title = $resultitem;
+	  }
 	  $url = $base_url . "/fedora/repository/$resultitem";
 	  $owner = get_file_owner_name($resultitem);
       $orphans[$oidcount] = array('oid' => $oidcount, 'pid' => $resultitem, 'title' => '<a href = "' . $url . '">' . $title . '</a>', 'owner' => $owner, 'state' => orphan_object_getState($resultitem), 'logmessage' => $history);
