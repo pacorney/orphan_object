@@ -29,6 +29,15 @@ function orphan_object_perm() {
  */
 function orphan_object_menu() {
   $items = array();
+  $items['admin/settings/orphan-object'] = array(
+    'title' => t('Orphan Object Administration'),
+	'description' => 'Control which collection is searched.',
+    'page callback' => 'drupal_get_form',
+	'page arguments' => array('orphan_object_admin_settings'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+	'file' => 'orphan_object.admin.inc',
+  );
   $items['admin/content/orphan-object'] = array(
     'title' => t('Orphan Object Administration'),
     'page callback' => 'orphan_object_form',
